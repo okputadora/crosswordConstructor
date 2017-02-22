@@ -15,7 +15,7 @@ $(document).ready(function(){
         $("#grid").append("<div class='row' id='row" + i + "'></div>");
         console.log("in here");
         for (p = 0; p < width; p++){
-          $("#row" + i).append("<div class=box></div>");
+          $("#row" + i).append("<input class='box' maxlength='1'></div>");
         }
       }
   })
