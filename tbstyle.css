@@ -1,0 +1,14 @@
+#toolbar{
+  width: 100%;
+  background-color: white;
+  height: 100px;
+  position: fixed;
+}
+
+#title{
+  letter-spacing: .09em;
+  color: black;
+  position: fixed;
+  top: 25px;
+  left: 120px;
+}

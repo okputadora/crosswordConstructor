@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Crossword</title>
   <!--import google font-->
-  <link href="https://fonts.googleapis.com/css?family=Megrim" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Muli" rel="stylesheet">
   <!--import style sheet-->
   <link rel="stylesheet" type = "text/css"
   href="style.css">
@@ -15,6 +15,7 @@
   <script src="../jQuery.js"></script>
   <script src="crossing.js"></script>
 <body id="main-content" class>
+  <?php include_once("toolbar.php") ?>
   <div id="opt1"class="option main-box">
     <h2 class="optTitle"> set grid</h2>
     <img class="optImg" src="opt1.jpg"/>
