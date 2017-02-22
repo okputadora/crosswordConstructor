@@ -3,7 +3,6 @@ $(document).ready(function(){
     $("#opt1").css("display", "none");
     $("#opt2").css("display", "none");
     $("#gridsize").css("display", "flex");
-    console.log("hi");
   })
 
   $("#submit").on("click", function(){
@@ -13,11 +12,20 @@ $(document).ready(function(){
       $("#crossword").css("display", "flex");
       for (i = 0; i < length; i++){
         $("#grid").append("<div class='row' id='row" + i + "'></div>");
-        console.log("in here");
         for (p = 0; p < width; p++){
-          $("#row" + i).append("<input class='box' maxlength='1'></div>");
+          $("#row" + i).append("<input class='box' id='box" + i + "" + p + "' maxlength='1'/>");
         }
       }
   })
 
+    $('#grid').on("keyup", ".box", function(e){
+      if ($("#crossword").css("display") === "flex"){
+        if (event.which === 32){
+          $(this).css("background-color", "black");
+        }
+        // if going along row
+        $(this).next().focus();
+        // if going along column
+      }
+    })
 })
