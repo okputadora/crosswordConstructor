@@ -15,15 +15,28 @@
   <script src="../jQuery.js"></script>
   <script src="crossing.js"></script>
 <body id="main-content" class>
-  <div id="opt1"class="option">
-    <img class="optImg"/>
+  <div id="opt1"class="option main-box">
     <h2 class="optTitle"> set grid</h2>
+    <img class="optImg" src="opt1.jpg"/>
     <p class="optDesc"> set your length and width first.</p>
   </div>
-  <div id="opt2"class="option">
-    <img class="optImg"/>
+  <div id="opt2"class="option main-box">
     <h2 class="optTitle"> build as you go</h2>
+    <img class="optImg"/>
     <p class="optDesc"> Just start connecting words, figure out the grid
     size later.</p>
+  </div>
+  <div id="gridsize" class="option main-box">
+    <h2>grid size</h2>
+    <input id="len"class="input"type="text" placeholder="length" />
+    <input id="wid"class="input"type="text" placeholder="width" />
+    <div id="submit">
+      create grid
+    </div>
+  </div>
+  <div id="crossword" class="main-box">
+    <div id="grid">
+
+    </div>
   </div>
 </body>

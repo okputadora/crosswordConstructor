@@ -1,0 +1,75 @@
+*{
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  border: 1px solid red;
+
+}
+
+#main-content{
+  display: flex;
+  justify-content: space-around;
+  background-color: #232323
+}
+
+.main-box{
+  margin-top: 200px;
+  width: 30%;
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  background-color: white;
+  cursor: pointer;
+}
+.option{
+  }
+
+.optImg{
+  padding: 5px;
+}
+
+.optTitle{
+  padding: 10px;
+  letter-spacing: .08em;
+}
+
+.optDesc{
+  padding: 5px;
+}
+
+.input{
+  font-size: 20px;
+  padding: 5px;
+  margin: 5px;
+}
+
+#submit{
+  padding: 5px;
+  margin: 5px;
+  font-size: 20px;
+  background-color: #999;
+  color: black;
+  transition: .3s;
+}
+
+#submit:hover{
+  background-color: black;
+  color: white;
+}
+#gridsize{
+  display: none;
+}
+
+#crossword{
+  display: none;
+}
+
+.row{
+  display:flex;
+}
+
+.box{
+  background-color: white;
+  min-height: 30px;
+  min-width: 30px;
+}
