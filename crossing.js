@@ -1,3 +1,10 @@
+// TO DO
+//  1. Unhighlight when changing direction
+//  2. space = black box
+//  3. go to next box after typing letter (skip black boxes)
+//
+
+
 var enteringRow = true;
 var enteringCol = false;
 var length;
@@ -22,6 +29,63 @@ function displayGrid(){
   for (q = 1; q < (width); q++){
     $("#box0-" + q).css("background-color", "#B2DAE7");
   }
+}
+
+function hightlightBox(){
+  $("input:focus").css("background-color", "#FFEDC3");
+}
+
+function highlight(rowId, colId){
+  // if row
+  if (enteringRow){
+    // find beginning
+    var begFound = false;
+    while (begFound === false){
+      colId -= 1;
+      console.log(colId);
+      if ($("#box" + rowId + "-" + colId).css("background-color") === "black" || colId === 0){
+        begFound = true;
+      }
+      // highlight until blackbox or end found
+      for (var x = colId + 1; x < width - 1; x++){
+        // abstract this out later
+        if ($("#box" + rowId + "-" + colId).css("background-color") === "black"){
+          break;
+        }
+        else{
+          $("#box" + rowId + "-" + x).css("background-color", "#B2DAE7");
+        }
+      }
+    }
+  }
+  // if column
+  if (!enteringRow){
+    // toggle button colors
+    $("#dir-row").css("background-color", "white");
+    $("#dir-col").css("background-color", "#B2DAE7");
+    var begFound = false;
+    rowId = parseInt(rowId);
+    while (begFound === false){
+      if($("#box" + rowId + "-" + colId).css("background-color") === "black" || rowId === 0){
+        begFound = true;
+      }
+      else{
+        rowId -= 1;
+      }
+    }
+    for (x = rowId + 1; x < length; x++){
+      // abstract this out later
+      if ($("#box" + rowId + "-" + colId).css("background-color") === "black"){
+        break;
+      }
+      else{
+        $("#box" + x + "-" + colId).css("background-color", "#B2DAE7");
+      }
+    }
+  }
+  // if column
+  // if blackbox
+    // stop
 }
 
 function goLeft(rowId, colId, elem){
@@ -64,7 +128,7 @@ function goDown(rowId, colId){
   }
 }
 
-
+// when all is loaded
 $(document).ready(function(){
   $("#opt1").on("click", function(){
     $("#opt1").css("display", "none");
@@ -83,7 +147,9 @@ $(document).ready(function(){
   })
 
     $('#grid').on("keyup", ".box", function(){
-      // if keystrike on main screen+
+      // toggle color
+      $(this).css("background-color", "white");
+      // if keystrike on main screen
       if ($("#crossword").css("display") === "flex"){
         // ids of current row and column
         var n = this.id.indexOf("-");
@@ -93,7 +159,14 @@ $(document).ready(function(){
         // if an arrow key is being pressed
         // left
         if(event.which === 37){
-          goLeft(row, col, thisEl);
+          if (enteringRow){
+            goLeft(row, col, thisEl);
+          }
+          else{
+            enteringRow = true;
+            highlight(row, col);
+          }
+
         }
         // up
         else if(event.which === 38){
@@ -105,7 +178,14 @@ $(document).ready(function(){
         }
         // down
         else if(event.which === 40){
-          goDown(row, col);
+          if (!enteringRow){
+            goDown(row, col);
+          }
+          else{
+            enteringRow = false;
+            highlight(row, col);
+          }
+
         }
         // space
         else if (event.which === 32){
@@ -126,14 +206,9 @@ $(document).ready(function(){
 
         }
         else{
-          // if entering row
-
-          // if entering column
         }
-
-        // if going along column
-        // if backspacing
       }
+      hightlightBox();
     })
 
     $("#dir-row").click(function(){
