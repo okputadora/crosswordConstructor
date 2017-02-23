@@ -18,6 +18,47 @@ function displayGrid(){
   $("#row0").css("background-color", "blue !important");
 }
 
+function goLeft(rowId, colId, elem){
+  // if first col
+  if (colId === "0"){
+    $("#box" + rowId + "-" + (width - 1)).focus();
+  }
+  else{
+    $(elem).prev().focus();
+  }
+}
+
+function goUp(rowId, colId){
+  if (rowId === "0"){
+    // focus on last row
+    $("#box" + (length - 1) + "-" + colId).focus();
+  }
+  else{
+    $("#box" + (rowId - 1) + "-" + colId).focus();
+  }
+}
+
+function goRight(rowId, colId, elem){
+  //if last row
+  if (colId === (width - 1).toString()){
+    $("#box" + rowId + "-0" ).focus();
+  }
+  else{
+    $(elem).next().focus();
+  }
+}
+
+function goDown(rowId, colId){
+  //if bottom row
+  if (rowId === (length - 1).toString()){
+    $("#box0-" + colId).focus();
+  }
+  else{
+    $("#box" + (parseInt(rowId) + 1) + "-" + colId).focus();
+  }
+}
+
+
 $(document).ready(function(){
   $("#opt1").on("click", function(){
     $("#opt1").css("display", "none");
@@ -40,61 +81,29 @@ $(document).ready(function(){
       if ($("#crossword").css("display") === "flex"){
         // ids of current row and column
         var n = this.id.indexOf("-");
-        var rowId = this.id.substring(3, n);
-        var colId = this.id.substring(n+1);
-        console.log(rowId);
-        console.log(colId);
+        var row = this.id.substring(3, n);
+        var col = this.id.substring(n+1);
+        var thisEl = this;
         // if an arrow key is being pressed
         // left
         if(event.which === 37){
-          // if first col
-          if (colId === "0"){
-            $("#box" + rowId + "-" + (width - 1)).focus();
-          }
-          else{
-            $(this).prev().focus();
-          }
+          goLeft(row, col, thisEl);
         }
         // up
         else if(event.which === 38){
-          //if top row
-          if (rowId === "0"){
-            // focus on last row
-            $("#box" + (length - 1) + "-" + colId).focus();
-          }
-          else{
-            $("#box" + (rowId - 1) + "-" + colId).focus();
-          }
+          goUp(row, col);
         }
         // right
         else if(event.which === 39){
-          //if last row
-          if (colId === (width - 1).toString()){
-            $("#box" + rowId + "-0" ).focus();
-          }
-          else{
-            $(this).next().focus();
-          }
-
+          goRight(row, col, thisEl);
         }
         // down
         else if(event.which === 40){
-          //if bottom row
-          if (rowId === (length - 1).toString()){
-            $("#box0-" + colId).focus();
-          }
-          else{
-            $("#box" + (parseInt(rowId) + 1) + "-" + colId).focus();
-          }
+          goDown(row, col);
         }
         // space
         else if (event.which === 32){
           $(this).css("background-color", "black");
-        }
-        // if at the end of the row
-        else if ($(this).next() === null){
-          // move to next row
-          console.log("end");
         }
         // if going along row
 
