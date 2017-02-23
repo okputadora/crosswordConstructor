@@ -15,7 +15,13 @@ function displayGrid(){
       $("#row" + i).append("<input class='box' id='box" + i + "-" + p + "' maxlength='1'/>");
     }
   }
-  $("#row0").css("background-color", "blue !important");
+  // set focus
+  $("#box0-0").focus();
+  // highlight first row
+  $("#box0-0").css("background-color", "#FFEDC3");
+  for (q = 1; q < (width); q++){
+    $("#box0-" + q).css("background-color", "#B2DAE7");
+  }
 }
 
 function goLeft(rowId, colId, elem){
@@ -105,13 +111,28 @@ $(document).ready(function(){
         else if (event.which === 32){
           $(this).css("background-color", "black");
         }
-        // if going along row
+        // backspace
+        else if (event.which === 8){
+          // if box is full
+          if ($(this).html() != ""){
+            $(this).html("");
+          }
+          if (enteringRow = true){
+            goLeft(row, col, thisEl);
+          }
+          else {
+            goUp(row, col);
+          }
+
+        }
+        else{
+          // if entering row
+
+          // if entering column
+        }
 
         // if going along column
         // if backspacing
-        else if (event.which === 8){
-          $(this).prev().focus();
-        }
       }
     })
 
