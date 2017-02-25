@@ -93,7 +93,7 @@ function highlight(){
   }
 }
 
-function hightlightBox(){
+function highlightBox(){
   $("input:focus").css("background-color", "#FFEDC3");
 }
 
@@ -207,20 +207,24 @@ $(document).ready(function(){
           }
         }
       }
-      hightlightBox();
+      highlightBox();
     })
 
     $("#dir-row").click(function(){
       enteringRow = true;
       $("#dir-row").css("background-color", "#B2DAE7");
       $("#dir-col").css("background-color", "white");
+      $("#box" + rowId + "-" + colId).focus()
       highlight();
+      highlightBox();
     })
     $("#dir-col").click(function(){
       enteringRow = false;
       console.log(colId);
       $("#dir-col").css("background-color", "#B2DAE7");
       $("#dir-row").css("background-color", "white");
+      $("#box" + rowId + "-" + colId).focus()
       highlight();
+      highlightBox();
     })
 })
