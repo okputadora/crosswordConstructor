@@ -6,7 +6,7 @@
 
 
 var enteringRow = true;
-var enteringCol = false;
+var hLightedArea = [];
 var length;
 var width;
 
@@ -25,36 +25,41 @@ function displayGrid(){
   // set focus
   $("#box0-0").focus();
   // highlight first row
-  $("#box0-0").css("background-color", "#FFEDC3");
-  for (q = 1; q < (width); q++){
-    $("#box0-" + q).css("background-color", "#B2DAE7");
-  }
-}
-
-function hightlightBox(){
-  $("input:focus").css("background-color", "#FFEDC3");
+  highlight(0, 0);
 }
 
 function highlight(rowId, colId){
+  console.log("row: " + rowId + " col: " + colId);
+  // remove current highlighted area
+  for (i in hLightedArea){
+    $(hLightedArea[i]).css("background-color", "white");
+  }
+
   // if row
   if (enteringRow){
     // find beginning
     var begFound = false;
     while (begFound === false){
-      colId -= 1;
-      console.log(colId);
+      colId = parseInt(colId);
       if ($("#box" + rowId + "-" + colId).css("background-color") === "black" || colId === 0){
         begFound = true;
       }
-      // highlight until blackbox or end found
-      for (var x = colId + 1; x < width - 1; x++){
-        // abstract this out later
-        if ($("#box" + rowId + "-" + colId).css("background-color") === "black"){
-          break;
-        }
-        else{
-          $("#box" + rowId + "-" + x).css("background-color", "#B2DAE7");
-        }
+      else{
+        colId -= 1;
+      }
+    }
+    // highlight until blackbox or end found
+    for (var x = colId; x < width; x++){
+      // abstract this out later
+      if ($("#box" + rowId + "-" + x).css("background-color") === "black"){
+        break;
+      }
+      else{
+        // record the current highlighted area/
+        var str = "#box" + rowId + "-" + x;
+        hLightedArea.push(str);
+        // highlight
+        $("#box" + rowId + "-" + x).css("background-color", "#B2DAE7");
       }
     }
   }
@@ -64,8 +69,10 @@ function highlight(rowId, colId){
     $("#dir-row").css("background-color", "white");
     $("#dir-col").css("background-color", "#B2DAE7");
     var begFound = false;
+    var distance = width;
     rowId = parseInt(rowId);
     while (begFound === false){
+      console.log(rowId);
       if($("#box" + rowId + "-" + colId).css("background-color") === "black" || rowId === 0){
         begFound = true;
       }
@@ -73,59 +80,67 @@ function highlight(rowId, colId){
         rowId -= 1;
       }
     }
-    for (x = rowId + 1; x < length; x++){
+    for (x = rowId; x < length; x++){
       // abstract this out later
       if ($("#box" + rowId + "-" + colId).css("background-color") === "black"){
         break;
       }
       else{
+        var str = "#box" + x + "-" + colId;
+        hLightedArea.push(str);
         $("#box" + x + "-" + colId).css("background-color", "#B2DAE7");
       }
     }
   }
-  // if column
-  // if blackbox
-    // stop
+}
+
+function hightlightBox(){
+  $("input:focus").css("background-color", "#FFEDC3");
 }
 
 function goLeft(rowId, colId, elem){
   // if first col
   if (colId === "0"){
-    $("#box" + rowId + "-" + (width - 1)).focus();
+    colId = width - 1;
   }
   else{
-    $(elem).prev().focus();
+    colId = parseInt(colId) - 1;
   }
+  $("#box" + rowId + "-" + colId).focus();
+  highlight(rowId, colId);
 }
-
 function goUp(rowId, colId){
   if (rowId === "0"){
     // focus on last row
-    $("#box" + (length - 1) + "-" + colId).focus();
+    rowId = length - 1;
   }
   else{
-    $("#box" + (rowId - 1) + "-" + colId).focus();
+    rowId = parseInt(rowId) - 1;
   }
+  $("#box" + rowId + "-" + colId).focus();
+  highlight(rowId, colId);
 }
-
 function goRight(rowId, colId, elem){
   //if last row
   if (colId === (width - 1).toString()){
-    $("#box" + rowId + "-0" ).focus();
+    colId = 0;
   }
   else{
-    $(elem).next().focus();
+    colId = parseInt(colId) + 1;
   }
+  $("#box" + rowId + "-" + colId).focus();
+  highlight(rowId, colId);
 }
-
 function goDown(rowId, colId){
   //if bottom row
   if (rowId === (length - 1).toString()){
-    $("#box0-" + colId).focus();
+    rowId = 0;
   }
   else{
-    $("#box" + (parseInt(rowId) + 1) + "-" + colId).focus();
+    rowId = parseInt(rowId) + 1;
   }
+  $("#box" + rowId + "-" + colId).focus();
+  highlight(rowId, colId);
 }
 
 // when all is loaded
@@ -136,7 +151,7 @@ $(document).ready(function(){
     $("#gridsize").css("display", "flex");
     $("#len").focus();
   })
-  // allow enter or click to move to next screen\
+  // allow enter or click to move to next screen
   $("#main-content").on("keyup", function(){
     if (event.which === 13 && $("#gridsize").css("display") === "flex"){
       displayGrid();
@@ -159,14 +174,7 @@ $(document).ready(function(){
         // if an arrow key is being pressed
         // left
         if(event.which === 37){
-          if (enteringRow){
             goLeft(row, col, thisEl);
-          }
-          else{
-            enteringRow = true;
-            highlight(row, col);
-          }
-
         }
         // up
         else if(event.which === 38){
@@ -178,17 +186,11 @@ $(document).ready(function(){
         }
         // down
         else if(event.which === 40){
-          if (!enteringRow){
-            goDown(row, col);
-          }
-          else{
-            enteringRow = false;
-            highlight(row, col);
-          }
-
+          goDown(row, col);
         }
         // space
         else if (event.which === 32){
+          console.log("SPACE");
           $(this).css("background-color", "black");
         }
         // backspace
@@ -197,15 +199,12 @@ $(document).ready(function(){
           if ($(this).html() != ""){
             $(this).html("");
           }
-          if (enteringRow = true){
+          else if (enteringRow = true){
             goLeft(row, col, thisEl);
           }
-          else {
+          else{
             goUp(row, col);
           }
-
-        }
-        else{
         }
       }
       hightlightBox();
@@ -213,8 +212,14 @@ $(document).ready(function(){
 
     $("#dir-row").click(function(){
       enteringRow = true;
+      $("#dir-row").css("background-color", "#B2DAE7");
+      $("#dir-col").css("background-color", "white");
+      // highlight();
     })
     $("#dir-col").click(function(){
       enteringRow = false;
+      $("#dir-col").css("background-color", "#B2DAE7");
+      $("#dir-row").css("background-color", "white");
+      // highlight();
     })
 })
