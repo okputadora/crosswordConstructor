@@ -113,15 +113,19 @@ function highlightBox(){
   $("input:focus").css("background-color", "#FFEDC3");
 }
 
-
-
 function goLeft(elem){
   // if first col
-  if (colId === "0"){
+  colId = parseInt(colId);
+  if (colId === 0){
     colId = width - 1;
   }
   else{
-    colId = parseInt(colId) - 1;
+    colId = colId - 1;
+  }
+  // if black move again
+  if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
+    console.log("colId = " + colId);
+    goLeft(elem);
   }
   $("#box" + rowId + "-" + colId).focus();
   highlight();
@@ -133,6 +137,10 @@ function goUp(){
   }
   else{
     rowId = parseInt(rowId) - 1;
+  }
+  // if black move again
+  if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
+    goUp();
   }
   $("#box" + rowId + "-" + colId).focus();
   highlight();
@@ -146,6 +154,10 @@ function goRight(elem){
   else{
     colId = parseInt(colId) + 1;
   }
+  // if black move again
+  if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
+    goRight(elem);
+  }
   $("#box" + rowId + "-" + colId).focus();
   highlight();
 }
@@ -157,8 +169,31 @@ function goDown(){
   else{
     rowId = parseInt(rowId) + 1;
   }
+  // if black move again
+  if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
+    goDown();
+  }
   $("#box" + rowId + "-" + colId).focus();
   highlight();
+}
+
+function toggleRow(){
+  enteringRow = true;
+  $("#dir-row").css("background-color", "#B2DAE7");
+  $("#dir-col").css("background-color", "white");
+  $("#box" + rowId + "-" + colId).focus()
+  highlight();
+  highlightBox();
+}
+
+function toggleCol(){
+  enteringRow = false;
+  console.log(colId);
+  $("#dir-col").css("background-color", "#B2DAE7");
+  $("#dir-row").css("background-color", "white");
+  $("#box" + rowId + "-" + colId).focus()
+  highlight();
+  highlightBox();
 }
 
 // when all is loaded
@@ -242,25 +277,27 @@ $(document).ready(function(){
             goDown(thisEl);
           }
         }
+        else if (event.which === 49){
+          if($(this).val() === "1"){
+            $(this).val("");
+          }
+          toggleRow();
+        }
+        else if (event.which === 50){
+          if($(this).val() === "2"){
+            $(this).val("");
+          }
+          toggleCol();
+        }
       }
       highlightBox();
     })
 
-    $("#dir-row").click(function(){
-      enteringRow = true;
-      $("#dir-row").css("background-color", "#B2DAE7");
-      $("#dir-col").css("background-color", "white");
-      $("#box" + rowId + "-" + colId).focus()
-      highlight();
-      highlightBox();
+
+      $("#dir-row").click(function(){
+      toggleRow();
     })
     $("#dir-col").click(function(){
-      enteringRow = false;
-      console.log(colId);
-      $("#dir-col").css("background-color", "#B2DAE7");
-      $("#dir-row").css("background-color", "white");
-      $("#box" + rowId + "-" + colId).focus()
-      highlight();
-      highlightBox();
+      toggleCol();
     })
 })
