@@ -97,7 +97,7 @@ function highlight(){
     }
     for (x; x < length; x++){
       // abstract this out later
-      if ($("#box" + x + "-" + colId).css("background-color") === "black"){
+      if ($("#box" + x + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
         break;
       }
       else{
@@ -131,12 +131,13 @@ function goLeft(elem){
   highlight();
 }
 function goUp(){
-  if (rowId === "0"){
+  rowId = parseInt(rowId);
+  if (rowId === 0){
     // focus on last row
     rowId = length - 1;
   }
   else{
-    rowId = parseInt(rowId) - 1;
+    rowId = rowId - 1;
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
@@ -146,13 +147,13 @@ function goUp(){
   highlight();
 }
 function goRight(elem){
-  console.log("going right");
+  colId = parseInt(colId);
   //if last row
-  if (colId === (width - 1).toString()){
+  if (colId === (width - 1)){
     colId = 0;
   }
   else{
-    colId = parseInt(colId) + 1;
+    colId = colId + 1;
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
@@ -162,12 +163,13 @@ function goRight(elem){
   highlight();
 }
 function goDown(){
+  rowId = parseInt(rowId);
   //if bottom row
-  if (rowId === (length - 1).toString()){
+  if (rowId === (length - 1)){
     rowId = 0;
   }
   else{
-    rowId = parseInt(rowId) + 1;
+    rowId = rowId + 1;
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
