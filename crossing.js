@@ -28,14 +28,19 @@ function displayGrid(){
   $("#box0-0").focus();
   // highlight first row
   highlight();
+  highlightBox();
 }
 
 function highlight(){
   console.log("row: " + rowId + " col: " + colId);
   // remove current highlighted area
   for (i in hLightedArea){
-    $(hLightedArea[i]).css("background-color", "white");
+    if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
+        $(hLightedArea[i]).css("background-color", "white");
+    }
+
   }
+  hLightedArea = [];
 
   // if row
   if (enteringRow){
@@ -43,17 +48,24 @@ function highlight(){
     var begFound = false;
     var x = parseInt(colId);
     while (begFound === false){
-      if ($("#box" + rowId + "-" + x).css("background-color") === "black" || x === 0){
+      if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
+        console.log("Background black;");
+        begFound = true;
+        x += 1;
+      }
+      else if (x === 0){
         begFound = true;
       }
       else{
+        console.log(x);
         x -= 1;
       }
     }
     // highlight until blackbox or end found
     for (x; x < width; x++){
       // abstract this out later
-      if ($("#box" + rowId + "-" + x).css("background-color") === "black"){
+      if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
+        console.log(x);
         break;
       }
       else{
@@ -72,7 +84,11 @@ function highlight(){
     var distance = width;
     x = parseInt(rowId);
     while (begFound === false){
-      if($("#box" + x + "-" + colId).css("background-color") === "black" || x === 0){
+      if($("#box" + x + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
+        x += 1;
+        begFound = true;
+      }
+      else if (x === 0){
         begFound = true;
       }
       else{
@@ -97,6 +113,8 @@ function highlightBox(){
   $("input:focus").css("background-color", "#FFEDC3");
 }
 
+
+
 function goLeft(elem){
   // if first col
   if (colId === "0"){
@@ -120,6 +138,7 @@ function goUp(){
   highlight();
 }
 function goRight(elem){
+  console.log("going right");
   //if last row
   if (colId === (width - 1).toString()){
     colId = 0;
@@ -190,8 +209,16 @@ $(document).ready(function(){
         }
         // space
         else if (event.which === 32){
-          console.log("SPACE");
-          $(this).css("background-color", "black");
+          console.log("spcae clicked");
+          $("#box" + rowId + "-" + colId).css("background-color", "black");
+          console.log($("#box" + rowId + "-" + colId).css("background-color"));
+          if (enteringRow){
+            goRight(thisEl);
+          }
+          else{
+            goDown(thisEl);
+          }
+
         }
         // backspace
         else if (event.which === 8){
@@ -199,11 +226,20 @@ $(document).ready(function(){
           if ($(this).html() != ""){
             $(this).html("");
           }
-          else if (enteringRow = true){
+          else if (enteringRow){
             goLeft(thisEl);
           }
           else{
             goUp();
+          }
+        }
+        // letter
+        else if(event.which >= 65 && event.which <= 90){
+          if (enteringRow){
+            goRight(thisEl);
+          }
+          else{
+            goDown(thisEl);
           }
         }
       }
