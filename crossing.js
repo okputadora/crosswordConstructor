@@ -12,16 +12,47 @@ var width;
 var rowId = 0;
 var colId = 0;
 
+function shadeBlack(row, column){
+  $("#box" + row + "-" + column).css("background-color", "black");
+}
+
 function displayGrid(){
   length = $("#len").val();
   width = $("#wid").val();
-  $("#gridsize").css("display", "none");
+  $("#premade").css("display", "none");
   $("#crossword").css("display", "flex");
   $("#tools").css("display", "flex");
   for (i = 0; i < length; i++){
     $("#grid").append("<div class='row' id='row" + i + "'></div>");
     for (p = 0; p < width; p++){
       $("#row" + i).append("<input class='box' id='box" + i + "-" + p + "' maxlength='1'/>");
+      // Add in default black squares
+      if (i <= 2 || i >= 12){
+        if (p === 7){
+          shadeBlack(i, p);
+        }
+      }
+      else if (i === 3 && (p === 0 || p === 8)){
+        shadeBlack(i, p);
+      }
+      else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
+        shadeBlack(i,p);
+      }
+      else if((i === 5 || i === 9) && (p === 4 || p === 10)){
+        shadeBlack(i,p);
+      }
+      else if((i === 6 || i === 10) && (p === 5 || p === 11)){
+        shadeBlack(i,p);
+      }
+      else if(i === 8 && (p === 3 || p === 9)){
+        shadeBlack(i,p);
+      }
+      else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
+        shadeBlack(i,p);
+      }
+      else if (i === 11 && (p === 6 || p === 14)){
+        shadeBlack(i,p);
+      }
     }
   }
   // set focus
@@ -209,13 +240,21 @@ $(document).ready(function(){
   // allow enter or click to move to next screen
   $("#main-content").on("keyup", function(){
     if (event.which === 13 && $("#gridsize").css("display") === "flex"){
-      displayGrid();
+      $("#gridsize").css("display", "none");
+      $("#premade").css("display", "flex");
     }
   })
   $("#submit").on("click", function(){
-      displayGrid();
+      $("#gridsize").css("display", "none");
+      $("#premade").css("display", "flex");
   })
 
+  $("#layout1").on("click", function(){
+    displayGrid();
+  })
+  $("#blanklayout").on("click", function(){
+    displayGrid();
+  })
     $('#grid').on("keyup", ".box", function(){
       // toggle color
 
@@ -246,9 +285,7 @@ $(document).ready(function(){
         }
         // space
         else if (event.which === 32){
-          console.log("spcae clicked");
           $("#box" + rowId + "-" + colId).css("background-color", "black");
-          console.log($("#box" + rowId + "-" + colId).css("background-color"));
           if (enteringRow){
             goRight(thisEl);
           }
@@ -260,10 +297,10 @@ $(document).ready(function(){
         // backspace
         else if (event.which === 8){
           // if box is full
-          if ($(this).html() != ""){
-            $(this).html("");
+          if ($(this).val() != ""){
+            $(this).val("");
           }
-          else if (enteringRow){
+          else if ($ ){
             goLeft(thisEl);
           }
           else{

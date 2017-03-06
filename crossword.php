@@ -14,6 +14,10 @@
 <head>
   <script src="../jQuery.js"></script>
   <script src="crossing.js"></script>
+  <script src="intelligence.js"></script>
+
+  <?php include_once("connect.php"); ?>
+
 <body id="main-content" class>
   <?php include_once("toolbar.php") ?>
   <div id="opt1"class="option main-box">
@@ -34,6 +38,11 @@
     <div id="submit">
       create grid
     </div>
+  </div>
+  <div id="premade" class="main-box">
+    <h2>Choose a layout</h2>
+    <div id="layout1">Layout 1</div>
+    <div id="blanklayout">Blank</div>
   </div>
   <div id="crossword" class="main-box">
     <div id="grid">
