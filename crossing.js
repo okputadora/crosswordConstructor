@@ -2,7 +2,6 @@
 //  1. Unhighlight when changing direction
 //  2. space = black box
 //  3. go to next box after typing letter (skip black boxes)
-//
 
 
 var enteringRow = true;
@@ -11,6 +10,7 @@ var length;
 var width;
 var rowId = 0;
 var colId = 0;
+var template1 = false;
 
 function shadeBlack(row, column){
   $("#box" + row + "-" + column).css("background-color", "black");
@@ -27,31 +27,34 @@ function displayGrid(){
     for (p = 0; p < width; p++){
       $("#row" + i).append("<input class='box' id='box" + i + "-" + p + "' maxlength='1'/>");
       // Add in default black squares
-      if (i <= 2 || i >= 12){
-        if (p === 7){
+
+      if (template1){
+        if (i <= 2 || i >= 12){
+          if (p === 7){
+            shadeBlack(i, p);
+          }
+        }
+        else if (i === 3 && (p === 0 || p === 8)){
           shadeBlack(i, p);
         }
-      }
-      else if (i === 3 && (p === 0 || p === 8)){
-        shadeBlack(i, p);
-      }
-      else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
-        shadeBlack(i,p);
-      }
-      else if((i === 5 || i === 9) && (p === 4 || p === 10)){
-        shadeBlack(i,p);
-      }
-      else if((i === 6 || i === 10) && (p === 5 || p === 11)){
-        shadeBlack(i,p);
-      }
-      else if(i === 8 && (p === 3 || p === 9)){
-        shadeBlack(i,p);
-      }
-      else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
-        shadeBlack(i,p);
-      }
-      else if (i === 11 && (p === 6 || p === 14)){
-        shadeBlack(i,p);
+        else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
+          shadeBlack(i,p);
+        }
+        else if((i === 5 || i === 9) && (p === 4 || p === 10)){
+          shadeBlack(i,p);
+        }
+        else if((i === 6 || i === 10) && (p === 5 || p === 11)){
+          shadeBlack(i,p);
+        }
+        else if(i === 8 && (p === 3 || p === 9)){
+          shadeBlack(i,p);
+        }
+        else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
+          shadeBlack(i,p);
+        }
+        else if (i === 11 && (p === 6 || p === 14)){
+          shadeBlack(i,p);
+        }
       }
     }
   }
@@ -63,7 +66,6 @@ function displayGrid(){
 }
 
 function highlight(){
-  console.log("row: " + rowId + " col: " + colId);
   // remove current highlighted area
   for (i in hLightedArea){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
@@ -72,7 +74,6 @@ function highlight(){
 
   }
   hLightedArea = [];
-
   // if row
   if (enteringRow){
     // find beginning
@@ -80,7 +81,6 @@ function highlight(){
     var x = parseInt(colId);
     while (begFound === false){
       if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
-        console.log("Background black;");
         begFound = true;
         x += 1;
       }
@@ -88,7 +88,6 @@ function highlight(){
         begFound = true;
       }
       else{
-        console.log(x);
         x -= 1;
       }
     }
@@ -96,7 +95,6 @@ function highlight(){
     for (x; x < width; x++){
       // abstract this out later
       if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
-        console.log(x);
         break;
       }
       else{
@@ -138,6 +136,7 @@ function highlight(){
       }
     }
   }
+  console.log("Highlighted area: " + hLightedArea);
 }
 
 function highlightBox(){
@@ -155,7 +154,6 @@ function goLeft(elem){
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
-    console.log("colId = " + colId);
     goLeft(elem);
   }
   $("#box" + rowId + "-" + colId).focus();
@@ -221,7 +219,6 @@ function toggleRow(){
 
 function toggleCol(){
   enteringRow = false;
-  console.log(colId);
   $("#dir-col").css("background-color", "#B2DAE7");
   $("#dir-row").css("background-color", "white");
   $("#box" + rowId + "-" + colId).focus()
@@ -250,11 +247,18 @@ $(document).ready(function(){
   })
 
   $("#layout1").on("click", function(){
+    template1 = true;
     displayGrid();
   })
   $("#blanklayout").on("click", function(){
+    template1 = false;
     displayGrid();
   })
+    $('#grid').on("click", ".box", function(){
+      colId = $(this).
+      highlight();
+      highlightBox();
+    });
     $('#grid').on("keyup", ".box", function(){
       // toggle color
 
@@ -297,10 +301,11 @@ $(document).ready(function(){
         // backspace
         else if (event.which === 8){
           // if box is full
-          if ($(this).val() != ""){
+          console.log($(this).val());
+          if ($(this).val() !== ""){
             $(this).val("");
           }
-          else if ($ ){
+          else if (enteringRow && $(this).val() === ""){
             goLeft(thisEl);
           }
           else{

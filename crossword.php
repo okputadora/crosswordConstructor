@@ -16,8 +16,6 @@
   <script src="crossing.js"></script>
   <script src="intelligence.js"></script>
 
-  <?php include_once("connect.php"); ?>
-
 <body id="main-content" class>
   <?php include_once("toolbar.php") ?>
   <div id="opt1"class="option main-box">
