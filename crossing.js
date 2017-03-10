@@ -6,23 +6,12 @@ var rowId = 0;
 var colId = 0;
 var template1 = false;
 var idInFocus;
-var numOfChecks;
+var testWordArea = [];
+var triedWords = [];
+var lastCol;
 
 // INTELLIGENCE
-
-function checkDown(){
-  console.log("Checking down");
-  for (i in numOfChecks){
-      // get the partial word
-
-  }
-
-}
-
-function autoWord(solving){
-  console.log("auto-word");
-  //return focus to the board
-  $(idInFocus).focus();
+function getPartialWord(){
   // find the highlighted word
   var partialWord = "";
   for (i in hLightedArea){
@@ -33,40 +22,83 @@ function autoWord(solving){
     }
     partialWord += letter;
   }
+  return partialWord;
+}
+function getDown(){
+  partialWord = getPartialWord();
+  $.ajax({
+    url: "get-down.php",
+    type: "post",
+    data: ({word: partialWord}),
+    success: function(data){
+      // if this was the last check
+      if (colId === lastCol){
+        // Success we can try the next word
+        triedWords = [];
+        // get the first box id of the current word
+        // var n = testWordArea[0].indexOf("-");
+        // console.log("Old rowid = " + rowId);
+        // rowId = parseInt(testWordArea[0].substring(3, n));
+        // console.log("New rowId = " + rowId);
+        // colId = parseInt(testWordArea[0].substring(n+1));
+        // increment to the next row
+        rowId += 1;
+        // check if we've hit a black box or the end
+        if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
 
+        }
+        // check if we're already on the last row
+        else if (rowId === length){
+
+        }
+        // otherwise move on to the next word
+        else{
+          enteringRow = true;
+          highlight("puzzle");
+        }
+      }
+      // if this isn't the last check
+      else {
+        // move to the next column and check that
+        colId += 1;
+        highlight("checkDown");
+      }
+    }
+  })
+}
+
+function autoWord(solving){
+  console.log("auto-word");
+  //return focus to the board
+  // $(idInFocus).focus();
+  partialWord = getPartialWord();
   $.ajax({
     url: "auto-word.php",
     type: "POST",
-    data: ({word: partialWord}),
+    data: 'word='+ partialWord + '&blacklist=' + triedWords,
     success: function(data){
+      console.log(data);
       var foundWord = data;
-      console.log(foundWord);
+      // enter the word into the grid
       for (i in hLightedArea){
         $(hLightedArea[i]).val(foundWord.charAt(i));
       }
       if (solving === "puzzle"){
-        numOfChecks = hLightedArea.length;
-        console.log(numOfChecks);
+        // store this location on the grid so we can navigate to the next one
+        testWordArea = hLightedArea;
+        console.log("testWordArea: " + testWordArea);
+        var len = testWordArea.length;
+        console.log("testword len: " + len);
+        var n = testWordArea[len-1].indexOf("-");
+        lastCol = parseInt(testWordArea[len-1].substring(n+1));
+        // add to tried words
+        triedWords.push(foundWord);
+        // getDown via highlight
         enteringRow = false;
+        highlight("checkDown");
       }
-      autoPuzzle();
     }
   })
-}
-function autoPuzzle(){
-  console.log("auto-puzzle");
-  // fill in the word
-
-  if (enteringRow){
-    console.log("")
-    autoWord("puzzle");
-  }
-  else{
-    console.log("checking down");
-    highlight("checkDown");
-  }
-  // if theres a word below
-    // move to this row
 }
 
 function shadeBlack(row, column){
@@ -122,6 +154,10 @@ function displayGrid(){
   highlightBox();
 }
 
+// highlights the current word. hLightedArea is an array of the #box's the make
+// up the current word. takes one argument solving which can = "puzzle" or
+// "getDown" and determines which function to call next. if the user is just
+// moving around the board no argument is passed.
 function highlight(solving){
   console.log(solving);
   // remove current highlighted area
@@ -129,7 +165,6 @@ function highlight(solving){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
         $(hLightedArea[i]).css("background-color", "white");
     }
-
   }
   hLightedArea = [];
   // if row
@@ -151,7 +186,6 @@ function highlight(solving){
     }
     // highlight until blackbox or end found
     for (x; x < width; x++){
-      // abstract this out later
       if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
         break;
       }
@@ -182,8 +216,8 @@ function highlight(solving){
         x -= 1;
       }
     }
+    // highklight the word
     for (x; x < length; x++){
-      // abstract this out later
       if ($("#box" + x + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
         break;
       }
@@ -194,13 +228,13 @@ function highlight(solving){
       }
     }
   }
-  // callback function if we're auto-filling the whole puzzle
+  // try a random word
   if (solving === "puzzle"){
-      console.log("auto-puzzle from highlight");
-      autoPuzzle();
+    autoWord("puzzle");
   }
   else if (solving === "checkDown"){
-    checkDown();
+    console.log("getting down");
+    getDown();
   }
 }
 
@@ -395,7 +429,6 @@ $(document).ready(function(){
             goUp();
           }
         }
-        // letter
         else if(event.which >= 65 && event.which <= 90){
           if (enteringRow){
             goRight(thisEl);
@@ -426,17 +459,5 @@ $(document).ready(function(){
       rowId = 0;
       colId = 0;
       highlight("puzzle");
-
-      // $.ajax({
-      //   url: "auto-puzzle.php",
-      //   type: "POST",
-      //   data: ({word: partialWords}),
-      //   success: function(data){
-      //     var foundWord = data;
-      //     for (i in hLightedArea){
-      //       $(hLightedArea[i]).val(foundWord.charAt(i));
-      //     }
-      //   }
-      // })
     })
 })
