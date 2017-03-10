@@ -1,9 +1,3 @@
-// TO DO
-//  1. Unhighlight when changing direction
-//  2. space = black box
-//  3. go to next box after typing letter (skip black boxes)
-
-
 var enteringRow = true;
 var hLightedArea = [];
 var length;
@@ -11,6 +5,69 @@ var width;
 var rowId = 0;
 var colId = 0;
 var template1 = false;
+var idInFocus;
+var numOfChecks;
+
+// INTELLIGENCE
+
+function checkDown(){
+  console.log("Checking down");
+  for (i in numOfChecks){
+      // get the partial word
+
+  }
+
+}
+
+function autoWord(solving){
+  console.log("auto-word");
+  //return focus to the board
+  $(idInFocus).focus();
+  // find the highlighted word
+  var partialWord = "";
+  for (i in hLightedArea){
+    var box = hLightedArea[i].toString();
+    var letter = $(box).val();
+    if (letter === ""){
+      letter = "_";
+    }
+    partialWord += letter;
+  }
+
+  $.ajax({
+    url: "auto-word.php",
+    type: "POST",
+    data: ({word: partialWord}),
+    success: function(data){
+      var foundWord = data;
+      console.log(foundWord);
+      for (i in hLightedArea){
+        $(hLightedArea[i]).val(foundWord.charAt(i));
+      }
+      if (solving === "puzzle"){
+        numOfChecks = hLightedArea.length;
+        console.log(numOfChecks);
+        enteringRow = false;
+      }
+      autoPuzzle();
+    }
+  })
+}
+function autoPuzzle(){
+  console.log("auto-puzzle");
+  // fill in the word
+
+  if (enteringRow){
+    console.log("")
+    autoWord("puzzle");
+  }
+  else{
+    console.log("checking down");
+    highlight("checkDown");
+  }
+  // if theres a word below
+    // move to this row
+}
 
 function shadeBlack(row, column){
   $("#box" + row + "-" + column).css("background-color", "black");
@@ -65,7 +122,8 @@ function displayGrid(){
   highlightBox();
 }
 
-function highlight(){
+function highlight(solving){
+  console.log(solving);
   // remove current highlighted area
   for (i in hLightedArea){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
@@ -136,11 +194,19 @@ function highlight(){
       }
     }
   }
-  console.log("Highlighted area: " + hLightedArea);
+  // callback function if we're auto-filling the whole puzzle
+  if (solving === "puzzle"){
+      console.log("auto-puzzle from highlight");
+      autoPuzzle();
+  }
+  else if (solving === "checkDown"){
+    checkDown();
+  }
 }
 
 function highlightBox(){
   $("input:focus").css("background-color", "#FFEDC3");
+  idInFocus = "#box" + rowId + "-" + colId;
 }
 
 function goLeft(elem){
@@ -211,7 +277,7 @@ function goDown(){
 function toggleRow(){
   enteringRow = true;
   $("#dir-row").css("background-color", "#B2DAE7");
-  $("#dir-col").css("background-color", "white");
+  $("#dir-col").css("background-color", "whitesmoke");
   $("#box" + rowId + "-" + colId).focus()
   highlight();
   highlightBox();
@@ -220,7 +286,7 @@ function toggleRow(){
 function toggleCol(){
   enteringRow = false;
   $("#dir-col").css("background-color", "#B2DAE7");
-  $("#dir-row").css("background-color", "white");
+  $("#dir-row").css("background-color", "whitesmoke");
   $("#box" + rowId + "-" + colId).focus()
   highlight();
   highlightBox();
@@ -255,11 +321,29 @@ $(document).ready(function(){
     displayGrid();
   })
     $('#grid').on("click", ".box", function(){
-      colId = $(this).
+      var n = this.id.indexOf("-");
+      rowId = this.id.substring(3, n);
+      colId = this.id.substring(n+1);
       highlight();
       highlightBox();
     });
-    $('#grid').on("keyup", ".box", function(){
+    $('#grid').on("keypress", ".box", function(){
+      if (event.which === 49){
+        if($(this).val() === "1"){
+          $(this).val("");
+        }
+        toggleRow();
+        return false;
+      }
+      else if (event.which === 50){
+        if($(this).val() === "2"){
+          $(this).val("");
+        }
+        toggleCol();
+        return false;
+      }
+    });
+    $('#grid').on("keydown", ".box", function(){
       // toggle color
 
       $(this).css("background-color", "white");
@@ -301,7 +385,6 @@ $(document).ready(function(){
         // backspace
         else if (event.which === 8){
           // if box is full
-          console.log($(this).val());
           if ($(this).val() !== ""){
             $(this).val("");
           }
@@ -321,18 +404,6 @@ $(document).ready(function(){
             goDown(thisEl);
           }
         }
-        else if (event.which === 49){
-          if($(this).val() === "1"){
-            $(this).val("");
-          }
-          toggleRow();
-        }
-        else if (event.which === 50){
-          if($(this).val() === "2"){
-            $(this).val("");
-          }
-          toggleCol();
-        }
       }
       highlightBox();
     })
@@ -343,5 +414,29 @@ $(document).ready(function(){
     })
     $("#dir-col").click(function(){
       toggleCol();
+    })
+
+    // solve puzzle/word
+    $("#auto-word").on("click", function(){
+      autoWord();
+    })
+    $("#auto-puzzle").on("click", function(){
+      // set focus to first square
+      $("#box0-0").focus();
+      rowId = 0;
+      colId = 0;
+      highlight("puzzle");
+
+      // $.ajax({
+      //   url: "auto-puzzle.php",
+      //   type: "POST",
+      //   data: ({word: partialWords}),
+      //   success: function(data){
+      //     var foundWord = data;
+      //     for (i in hLightedArea){
+      //       $(hLightedArea[i]).val(foundWord.charAt(i));
+      //     }
+      //   }
+      // })
     })
 })
