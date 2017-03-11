@@ -3,7 +3,7 @@
   $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "'";
   $response = @mysqli_query($dbc, $query);
   $count = mysqli_num_rows($response);
-  if ($count > 0){
-    echo true;
+  if ($count > 50){
+    echo $count;
   }
 ?>

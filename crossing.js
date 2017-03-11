@@ -31,8 +31,21 @@ function getDown(){
     type: "post",
     data: ({word: partialWord}),
     success: function(data){
+      // if there were no possible words
+      if (data == false){
+        // clear the test word and try again
+        for (i in testWordArea){
+          $(testWordArea[i]).val("");
+        }
+        // try again
+        enteringRow = true;
+        // this needs to be dynamic
+        colId = 0;
+        highlight("puzzle");
+
+      }
       // if this was the last check
-      if (colId === lastCol){
+      else if (colId === lastCol){
         // Success we can try the next word
         triedWords = [];
         // get the first box id of the current word
@@ -53,7 +66,9 @@ function getDown(){
         }
         // otherwise move on to the next word
         else{
+          //
           enteringRow = true;
+          colId = 0;
           highlight("puzzle");
         }
       }
@@ -68,14 +83,15 @@ function getDown(){
 }
 
 function autoWord(solving){
-  console.log("auto-word");
+  console.log("TRIED WORDS: " + triedWords);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
+  var jsonString = JSON.stringify(triedWords);
   $.ajax({
     url: "auto-word.php",
     type: "POST",
-    data: 'word='+ partialWord + '&blacklist=' + triedWords,
+    data: 'word='+ partialWord + '&blacklist=' + jsonString,
     success: function(data){
       console.log(data);
       var foundWord = data;
@@ -86,9 +102,7 @@ function autoWord(solving){
       if (solving === "puzzle"){
         // store this location on the grid so we can navigate to the next one
         testWordArea = hLightedArea;
-        console.log("testWordArea: " + testWordArea);
         var len = testWordArea.length;
-        console.log("testword len: " + len);
         var n = testWordArea[len-1].indexOf("-");
         lastCol = parseInt(testWordArea[len-1].substring(n+1));
         // add to tried words
@@ -159,7 +173,6 @@ function displayGrid(){
 // "getDown" and determines which function to call next. if the user is just
 // moving around the board no argument is passed.
 function highlight(solving){
-  console.log(solving);
   // remove current highlighted area
   for (i in hLightedArea){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
@@ -233,7 +246,6 @@ function highlight(solving){
     autoWord("puzzle");
   }
   else if (solving === "checkDown"){
-    console.log("getting down");
     getDown();
   }
 }
