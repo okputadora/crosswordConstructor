@@ -1,14 +1,27 @@
+// tracks which direction the next box will be pulled from when highlighting,
+// filling in, or checking a word
 var enteringRow = true;
+// array of highlighted boxes
 var hLightedArea = [];
+// length and width of grid
 var length;
 var width;
+// Ids points to the number row or column
 var rowId = 0;
 var colId = 0;
+// function displayGrid() puts in preset black squares when this is true
 var template1 = false;
+// not sure -- can probably delete
 var idInFocus;
+// when solving puzzle testWordArea is the wordSpace of the across word. It is
+// needed so we can get back to this location after checking the crossing down
+// words.
 var testWordArea = [];
+// an array of words we've already tried in the current wordspace
 var triedWords = [];
+// last column of the wordspace
 var lastCol;
+
 
 // INTELLIGENCE
 function getPartialWord(){
@@ -48,13 +61,6 @@ function getDown(){
       else if (colId === lastCol){
         // Success we can try the next word
         triedWords = [];
-        // get the first box id of the current word
-        // var n = testWordArea[0].indexOf("-");
-        // console.log("Old rowid = " + rowId);
-        // rowId = parseInt(testWordArea[0].substring(3, n));
-        // console.log("New rowId = " + rowId);
-        // colId = parseInt(testWordArea[0].substring(n+1));
-        // increment to the next row
         rowId += 1;
         // check if we've hit a black box or the end
         if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
@@ -109,6 +115,11 @@ function autoWord(solving){
         triedWords.push(foundWord);
         // getDown via highlight
         enteringRow = false;
+        testWords = [];
+        // find the top (e.g. if were on the second row move up to the first,
+        // if we're on the last row move up till a box)
+
+
         highlight("checkDown");
       }
     }
@@ -472,4 +483,34 @@ $(document).ready(function(){
       colId = 0;
       highlight("puzzle");
     })
+
+    function deleteForever(){
+          console.log("filtering...");
+          $.ajax({
+            url: "auto-clue.php",
+            type: "post",
+            success: function(data){
+              console.log("rows deleted " + data);
+              // deleteForever();
+            }
+        })
+    }
+    $("#auto-clue").on("click", function(){
+      deleteForever();
+    })
+
+    $("#title").on("click", function(){
+      deleteForever();
+      partialWord = "sta";
+      $.ajax({
+        url: "duplicate.php",
+        type: "post",
+        data: ({word: partialWord}),
+        success: function(data){
+          console.log(" Word: " + data);
+
+        }
+    })
+    })
+
 })
