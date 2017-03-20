@@ -37,6 +37,16 @@ function getPartialWord(){
   }
   return partialWord;
 }
+
+function getCrosses(){
+  // if down
+  // go through each column
+  for (var i = 0; i <= lastCol; i++){
+
+  }
+  // if across
+
+}
 function checkFreq(){
   // check the frequency of the crossing-words
 
@@ -44,7 +54,6 @@ function checkFreq(){
 }
 
 function autoWord(solving){
-  console.log("TRIED WORDS: " + triedWords);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
@@ -62,8 +71,7 @@ function autoWord(solving){
       }
       if (solving === "puzzle"){
         // NEW CODE HERE
-
-        highlight("checkDown");
+        getCrosses();
       }
     }
   })
