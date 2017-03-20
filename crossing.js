@@ -37,55 +37,10 @@ function getPartialWord(){
   }
   return partialWord;
 }
-function getDown(){
-  partialWord = getPartialWord();
-  $.ajax({
-    url: "get-down.php",
-    type: "post",
-    data: ({word: partialWord}),
-    success: function(data){
-      // if there were no possible words
-      if (data == false){
-        // clear the test word and try again
-        for (i in testWordArea){
-          $(testWordArea[i]).val("");
-        }
-        // try again
-        enteringRow = true;
-        // this needs to be dynamic
-        colId = 0;
-        highlight("puzzle");
+function checkFreq(){
+  // check the frequency of the crossing-words
 
-      }
-      // if this was the last check
-      else if (colId === lastCol){
-        // Success we can try the next word
-        triedWords = [];
-        rowId += 1;
-        // check if we've hit a black box or the end
-        if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
-
-        }
-        // check if we're already on the last row
-        else if (rowId === length){
-
-        }
-        // otherwise move on to the next word
-        else{
-          //
-          enteringRow = true;
-          colId = 0;
-          highlight("puzzle");
-        }
-      }
-      // if this isn't the last check
-      else {
-        // move to the next column and check that
-        colId += 1;
-        highlight("checkDown");
-      }
-    }
-  })
+  // select the lowest frequency word and call autoword
 }
 
 function autoWord(solving){
@@ -106,19 +61,7 @@ function autoWord(solving){
         $(hLightedArea[i]).val(foundWord.charAt(i));
       }
       if (solving === "puzzle"){
-        // store this location on the grid so we can navigate to the next one
-        testWordArea = hLightedArea;
-        var len = testWordArea.length;
-        var n = testWordArea[len-1].indexOf("-");
-        lastCol = parseInt(testWordArea[len-1].substring(n+1));
-        // add to tried words
-        triedWords.push(foundWord);
-        // getDown via highlight
-        enteringRow = false;
-        testWords = [];
-        // find the top (e.g. if were on the second row move up to the first,
-        // if we're on the last row move up till a box)
-
+        // NEW CODE HERE
 
         highlight("checkDown");
       }
@@ -251,13 +194,6 @@ function highlight(solving){
         $("#box" + x + "-" + colId).css("background-color", "#B2DAE7");
       }
     }
-  }
-  // try a random word
-  if (solving === "puzzle"){
-    autoWord("puzzle");
-  }
-  else if (solving === "checkDown"){
-    getDown();
   }
 }
 
