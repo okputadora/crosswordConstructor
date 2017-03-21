@@ -21,6 +21,9 @@ var testWordArea = [];
 var triedWords = [];
 // last column of the wordspace
 var lastCol;
+var lowestFreq = -1;
+var lowFreqRow;
+var lowFreqCol;
 
 
 // INTELLIGENCE
@@ -37,23 +40,74 @@ function getPartialWord(){
   }
   return partialWord;
 }
+function getDown(){
+  partialWord = getPartialWord();
+  $.ajax({
+    url: "get-down.php",
+    type: "post",
+    data: ({word: partialWord}),
+    success: function(data){
+      data = parseInt(data);
+      // if this is the first check of a word
+      console.log("freq: " + data);
+      if (lowestFreq === -1){
+        lowestFreq = data;
+        lowFreqRow = rowId;
+        lowFreqCol = colId;
+        console.log("INHERE");
+      }
+      else if (data <= lowestFreq){
+        console.log("TRUE");
+        lowestFreq = data;
+        lowFreqRow = rowId;
+        lowFreqCol = colId;
+        console.log(partialWord + "-" + data + "" + rowId + colId);
+      }
+      // if there were no possible words
+      if (data === 0){
+        // clear the test word and try again
+        for (i in testWordArea){
+          $(testWordArea[i]).val("");
+        }
+        // try again
+        enteringRow = true;
+        // this needs to be dynamic
+        colId = 0;
+        highlight("puzzle");
+      }
+      // if this was the last check
+      else if (colId === lastCol){
+        console.log("LowestFreq = " + lowestFreq
+        );
+        // Success we can try the next word
+        triedWords = [];
+        rowId += 1;
+        // check if we've hit a black box or the end
+        if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
 
-function getCrosses(){
-  // if down
-  // go through each column
-  for (var i = 0; i <= lastCol; i++){
+        }
+        // check if we're already on the last row
+        else if (rowId === length){
 
-  }
-  // if across
-
-}
-function checkFreq(){
-  // check the frequency of the crossing-words
-
-  // select the lowest frequency word and call autoword
+        }
+        // otherwise move on to the next word
+        else{
+          //
+          console.log(partialWord + ": " + data);
+        }
+      }
+      // if this isn't the last check
+      else {
+        // move to the next column and check that
+        colId += 1;
+        highlight("checkDown");
+      }
+    }
+  })
 }
 
 function autoWord(solving){
+  console.log("TRIED WORDS: " + triedWords);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
@@ -70,8 +124,21 @@ function autoWord(solving){
         $(hLightedArea[i]).val(foundWord.charAt(i));
       }
       if (solving === "puzzle"){
-        // NEW CODE HERE
-        getCrosses();
+        // store this location on the grid so we can navigate to the next one
+        testWordArea = hLightedArea;
+        var len = testWordArea.length;
+        var n = testWordArea[len-1].indexOf("-");
+        lastCol = parseInt(testWordArea[len-1].substring(n+1));
+        // add to tried words
+        triedWords.push(foundWord);
+        // getDown via highlight
+        enteringRow = false;
+        testWords = [];
+        // find the top (e.g. if were on the second row move up to the first,
+        // if we're on the last row move up till a box)
+
+
+        highlight("checkDown");
       }
     }
   })
@@ -202,6 +269,13 @@ function highlight(solving){
         $("#box" + x + "-" + colId).css("background-color", "#B2DAE7");
       }
     }
+  }
+  // try a random word
+  if (solving === "puzzle"){
+    autoWord("puzzle");
+  }
+  else if (solving === "checkDown"){
+    getDown();
   }
 }
 
