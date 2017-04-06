@@ -16,8 +16,5 @@
     <div class="tool" id="clues">
       <div class="button" id="auto-clue">auto-fill clues</div>
     </div>
-    <div class="button" id="numbers">
-
-    </div>
   </div>
 </div>

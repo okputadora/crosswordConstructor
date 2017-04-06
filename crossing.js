@@ -24,6 +24,7 @@ var lastCol;
 var lowestFreq = -1;
 var lowFreqRow;
 var lowFreqCol;
+var sqNum = 1;
 
 
 // INTELLIGENCE
@@ -250,7 +251,13 @@ function highlight(solving){
 }
 
 function shadeBlack(row, column){
-  $("#box" + row + "-" + column).css("background-color", "black");
+
+}
+
+function addNumbers(row, col){
+  $("#boxes-box" + row + "-" + col).append("<div class='number'>" + sqNum + "</div>");
+  console.log("And here");
+  sqNum += 1;
 }
 
 function displayGrid(){
@@ -267,29 +274,36 @@ function displayGrid(){
       if (template1){
         if (i <= 2 || i >= 12){
           if (p === 7){
-            shadeBlack(i, p);
+            $("#box" + i + "-" + p).css("background-color", "black");
           }
         }
         else if (i === 3 && (p === 0 || p === 8)){
-          shadeBlack(i, p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if((i === 5 || i === 9) && (p === 4 || p === 10)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if((i === 6 || i === 10) && (p === 5 || p === 11)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if(i === 8 && (p === 3 || p === 9)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
         }
         else if (i === 11 && (p === 6 || p === 14)){
-          shadeBlack(i,p);
+          $("#box" + i + "-" + p).css("background-color", "black");
+        }
+      }
+      if ($("#box" + i + "-" + p).css("background-color") != "rgb(0, 0, 0)"){
+        // add numbers
+        console.log($("#box" + (i - 1) + "-" + p).css("background-color"));
+        if (i === 0 || p === 0 || $("#box" + (i) + "-" + (p - 1)).css("background-color") === "rgb(0, 0, 0)" || $("#box" + (i - 1) + "-" + p).css("background-color") === "rgb(0, 0, 0)"){
+          addNumbers(i,p);
         }
       }
     }
@@ -370,10 +384,6 @@ function goDown(){
   $("#box" + rowId + "-" + colId).focus();
   highlight();
 }
-function addNumbers(){
-  $("#boxes-box0-0").append("<div class='number'>1</div>");
-  console.log("And here");
-}
 
 function toggleRow(){
   enteringRow = true;
@@ -400,12 +410,6 @@ $(document).ready(function(){
     $("#opt2").css("display", "none");
     $("#gridsize").css("display", "flex");
     $("#len").focus();
-  })
-
-  // Add numbers to the grid
-  $("#numbers").on("click", function(){
-    console.log("yo we in here");
-    addNumbers();
   })
 
   // allow enter or click to move to next screen
