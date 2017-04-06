@@ -40,28 +40,36 @@ function getPartialWord(){
   }
   return partialWord;
 }
-function getDown(){
+function getCross(){
+  console.log("getCross()");
+  console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   partialWord = getPartialWord();
-  $.ajax({
+  if (partialWord.indexOf("_") < 0){
+    if (enteringRow){
+      rowId += 1;
+    }
+    else{
+      colId += 1;
+    }
+    highlight("checkDown");
+  }
+  else{
+    $.ajax({
     url: "get-down.php",
     type: "post",
     data: ({word: partialWord}),
     success: function(data){
       data = parseInt(data);
       // if this is the first check of a word
-      console.log("freq: " + data);
       if (lowestFreq === -1){
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
-        console.log("INHERE");
       }
       else if (data <= lowestFreq){
-        console.log("TRUE");
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
-        console.log(partialWord + "-" + data + "" + rowId + colId);
       }
       // if there were no possible words
       if (data === 0){
@@ -69,19 +77,19 @@ function getDown(){
         for (i in testWordArea){
           $(testWordArea[i]).val("");
         }
-        // try again
-        enteringRow = true;
         // this needs to be dynamic
         colId = 0;
         highlight("puzzle");
       }
       // if this was the last check
-      else if (colId === lastCol){
-        console.log("LowestFreq = " + lowestFreq
-        );
-        // Success we can try the next word
-        triedWords = [];
-        rowId += 1;
+      else if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
+
+        console.log("found last row/col");
+        // Fill in the lowest frequency word
+        rowId = lowFreqRow;
+        colId = lowFreqCol;
+        highlight("puzzle");
+        lowestFreq = -1;
         // check if we've hit a black box or the end
         if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
 
@@ -93,21 +101,27 @@ function getDown(){
         // otherwise move on to the next word
         else{
           //
-          console.log(partialWord + ": " + data);
         }
       }
       // if this isn't the last check
       else {
-        // move to the next column and check that
-        colId += 1;
+        // move to the next column or row and check that
+        if (enteringRow){
+          rowId += 1;
+        }
+        else{
+          colId += 1;
+        }
         highlight("checkDown");
       }
     }
   })
 }
+}
 
 function autoWord(solving){
-  console.log("TRIED WORDS: " + triedWords);
+  console.log("autoWord() + " + solving);
+  console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
@@ -117,7 +131,6 @@ function autoWord(solving){
     type: "POST",
     data: 'word='+ partialWord + '&blacklist=' + jsonString,
     success: function(data){
-      console.log(data);
       var foundWord = data;
       // enter the word into the grid
       for (i in hLightedArea){
@@ -128,80 +141,36 @@ function autoWord(solving){
         testWordArea = hLightedArea;
         var len = testWordArea.length;
         var n = testWordArea[len-1].indexOf("-");
-        lastCol = parseInt(testWordArea[len-1].substring(n+1));
+        if (enteringRow){
+          last = parseInt(testWordArea[len-1].substring(n+1));
+        }
+        else{
+          last = parseInt(testWordArea[len-1].substring(n-1))
+        }
+        if (enteringRow){
+          enteringRow = false;
+        }
+        else{
+          enteringRow = true;
+        }
         // add to tried words
         triedWords.push(foundWord);
         // getDown via highlight
-        enteringRow = false;
         testWords = [];
         // find the top (e.g. if were on the second row move up to the first,
         // if we're on the last row move up till a box)
-
-
         highlight("checkDown");
       }
     }
   })
 }
-
-function shadeBlack(row, column){
-  $("#box" + row + "-" + column).css("background-color", "black");
-}
-
-function displayGrid(){
-  length = $("#len").val();
-  width = $("#wid").val();
-  $("#premade").css("display", "none");
-  $("#crossword").css("display", "flex");
-  $("#tools").css("display", "flex");
-  for (i = 0; i < length; i++){
-    $("#grid").append("<div class='row' id='row" + i + "'></div>");
-    for (p = 0; p < width; p++){
-      $("#row" + i).append("<input class='box' id='box" + i + "-" + p + "' maxlength='1'/>");
-      // Add in default black squares
-
-      if (template1){
-        if (i <= 2 || i >= 12){
-          if (p === 7){
-            shadeBlack(i, p);
-          }
-        }
-        else if (i === 3 && (p === 0 || p === 8)){
-          shadeBlack(i, p);
-        }
-        else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
-          shadeBlack(i,p);
-        }
-        else if((i === 5 || i === 9) && (p === 4 || p === 10)){
-          shadeBlack(i,p);
-        }
-        else if((i === 6 || i === 10) && (p === 5 || p === 11)){
-          shadeBlack(i,p);
-        }
-        else if(i === 8 && (p === 3 || p === 9)){
-          shadeBlack(i,p);
-        }
-        else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
-          shadeBlack(i,p);
-        }
-        else if (i === 11 && (p === 6 || p === 14)){
-          shadeBlack(i,p);
-        }
-      }
-    }
-  }
-  // set focus
-  $("#box0-0").focus();
-  // highlight first row
-  highlight();
-  highlightBox();
-}
-
 // highlights the current word. hLightedArea is an array of the #box's the make
 // up the current word. takes one argument solving which can = "puzzle" or
 // "getDown" and determines which function to call next. if the user is just
 // moving around the board no argument is passed.
 function highlight(solving){
+  console.log("highlight() + " + solving);
+  console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   // remove current highlighted area
   for (i in hLightedArea){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
@@ -227,6 +196,7 @@ function highlight(solving){
       }
     }
     // highlight until blackbox or end found
+
     for (x; x < width; x++){
       if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
         break;
@@ -275,8 +245,60 @@ function highlight(solving){
     autoWord("puzzle");
   }
   else if (solving === "checkDown"){
-    getDown();
+    getCross();
   }
+}
+
+function shadeBlack(row, column){
+  $("#box" + row + "-" + column).css("background-color", "black");
+}
+
+function displayGrid(){
+  length = $("#len").val();
+  width = $("#wid").val();
+  $("#premade").css("display", "none");
+  $("#crossword").css("display", "flex");
+  $("#tools").css("display", "flex");
+  for (i = 0; i < length; i++){
+    $("#grid").append("<div class='row' id='row" + i + "'></div>");
+    for (p = 0; p < width; p++){
+      $("#row" + i).append("<div class='boxes-box' id='boxes-box" + i + "-" + p + "'><input class='box' id='box" + i + "-" + p + "' maxlength='1'/></div>");
+      // Add in default black squares
+      if (template1){
+        if (i <= 2 || i >= 12){
+          if (p === 7){
+            shadeBlack(i, p);
+          }
+        }
+        else if (i === 3 && (p === 0 || p === 8)){
+          shadeBlack(i, p);
+        }
+        else if(i === 4 & (p <= 3 || p === 9 || p === 14)){
+          shadeBlack(i,p);
+        }
+        else if((i === 5 || i === 9) && (p === 4 || p === 10)){
+          shadeBlack(i,p);
+        }
+        else if((i === 6 || i === 10) && (p === 5 || p === 11)){
+          shadeBlack(i,p);
+        }
+        else if(i === 8 && (p === 3 || p === 9)){
+          shadeBlack(i,p);
+        }
+        else if (i === 10 && (p === 0 || p === 5 || p >= 11)){
+          shadeBlack(i,p);
+        }
+        else if (i === 11 && (p === 6 || p === 14)){
+          shadeBlack(i,p);
+        }
+      }
+    }
+  }
+  // set focus
+  $("#box0-0").focus();
+  // highlight first row
+  highlight();
+  highlightBox();
 }
 
 function highlightBox(){
@@ -348,6 +370,10 @@ function goDown(){
   $("#box" + rowId + "-" + colId).focus();
   highlight();
 }
+function addNumbers(){
+  $("#boxes-box0-0").append("<div class='number'>1</div>");
+  console.log("And here");
+}
 
 function toggleRow(){
   enteringRow = true;
@@ -375,6 +401,13 @@ $(document).ready(function(){
     $("#gridsize").css("display", "flex");
     $("#len").focus();
   })
+
+  // Add numbers to the grid
+  $("#numbers").on("click", function(){
+    console.log("yo we in here");
+    addNumbers();
+  })
+
   // allow enter or click to move to next screen
   $("#main-content").on("keyup", function(){
     if (event.which === 13 && $("#gridsize").css("display") === "flex"){
@@ -500,35 +533,6 @@ $(document).ready(function(){
       rowId = 0;
       colId = 0;
       highlight("puzzle");
-    })
-
-    function deleteForever(){
-          console.log("filtering...");
-          $.ajax({
-            url: "auto-clue.php",
-            type: "post",
-            success: function(data){
-              console.log("rows deleted " + data);
-              // deleteForever();
-            }
-        })
-    }
-    $("#auto-clue").on("click", function(){
-      deleteForever();
-    })
-
-    $("#title").on("click", function(){
-      deleteForever();
-      partialWord = "sta";
-      $.ajax({
-        url: "duplicate.php",
-        type: "post",
-        data: ({word: partialWord}),
-        success: function(data){
-          console.log(" Word: " + data);
-
-        }
-    })
     })
 
 })
