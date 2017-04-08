@@ -25,7 +25,9 @@ var lowestFreq = -1;
 var lowFreqRow;
 var lowFreqCol;
 var sqNum = 1;
-
+var prevFreq = 1000;
+var testWord;
+var debug = 0;
 
 // INTELLIGENCE
 function getPartialWord(){
@@ -34,7 +36,7 @@ function getPartialWord(){
   for (i in hLightedArea){
     var box = hLightedArea[i].toString();
     var letter = $(box).val();
-    if (letter === ""){
+    if (letter === "" || letter === "_"){
       letter = "_";
     }
     partialWord += letter;
@@ -45,6 +47,7 @@ function getCross(){
   console.log("getCross()");
   console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   partialWord = getPartialWord();
+  // if there aren't any blanks we don't need to check this word
   if (partialWord.indexOf("_") < 0){
     if (enteringRow){
       rowId += 1;
@@ -67,25 +70,48 @@ function getCross(){
         lowFreqRow = rowId;
         lowFreqCol = colId;
       }
+      // if this is the lowest frequency word
       else if (data <= lowestFreq){
+        // Store previous lowet frequency to check against next autoword
+        prevFreq = lowestFreq;
+        // then replace current lowestFreq
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
       }
       // if there were no possible words
       if (data === 0){
-        // clear the test word and try again
+        console.log("row " + rowId + " col " + colId + " had 0 possible words");
+        // reset the test word to the previous partial word
         for (i in testWordArea){
-          $(testWordArea[i]).val("");
+          console.log(testWord);
+          $(testWordArea[i]).val(testWord.charAt(i));
+
         }
-        // this needs to be dynamic
-        colId = 0;
+        // reset the row and column
+        var n = testWordArea[0].indexOf("-");
+        rowId = parseInt(testWordArea[0].substring(n-1));
+        colId = parseInt(testWordArea[0].substring(n+1));
+        console.log("Test word area: " + testWordArea[0]);
+        console.log("ROWID RES: " + rowId);
+        if (!enteringRow){
+          enteringRow = true;
+        }
+        else {enteringRow = false};
+        lowestFreq = -1;
         highlight("puzzle");
       }
       // if this was the last check
       else if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
-
-        console.log("found last row/col");
+        // check if the previous word had a lower freuqency
+        if (lowestFreq > prevFreq){
+          //
+        }
+        // set this autowords prevFreq to final prev freq
+        console.log("found last row/col lowest Freq: " + lowestFreq);
+        console.log("At row " + lowFreqRow + " and col " + lowFreqCol);
+        // if lowestFreq = 0 this word will not do. it must be replaced
+        // if (lowestFreq)
         // Fill in the lowest frequency word
         rowId = lowFreqRow;
         colId = lowFreqCol;
@@ -121,11 +147,13 @@ function getCross(){
 }
 
 function autoWord(solving){
+  debug += 1;
   console.log("autoWord() + " + solving);
   console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
+  testWord = partialWord;
   var jsonString = JSON.stringify(triedWords);
   $.ajax({
     url: "auto-word.php",
@@ -134,6 +162,7 @@ function autoWord(solving){
     success: function(data){
       var foundWord = data;
       // enter the word into the grid
+      console.log("Found word: " + foundWord);
       for (i in hLightedArea){
         $(hLightedArea[i]).val(foundWord.charAt(i));
       }
@@ -142,25 +171,33 @@ function autoWord(solving){
         testWordArea = hLightedArea;
         var len = testWordArea.length;
         var n = testWordArea[len-1].indexOf("-");
+        var x = testWordArea[0].indexOf("-");
+        colId = parseInt(testWordArea[0].substring(x+1));
+        rowId = parseInt(testWordArea[0].substring(x-1));
         if (enteringRow){
           last = parseInt(testWordArea[len-1].substring(n+1));
-        }
-        else{
-          last = parseInt(testWordArea[len-1].substring(n-1))
-        }
-        if (enteringRow){
+          console.log("last col: " + last);
           enteringRow = false;
         }
         else{
+          last = parseInt(testWordArea[len-1].substring(n-1))
+          console.log("last row: " + last);
           enteringRow = true;
         }
+
         // add to tried words
         triedWords.push(foundWord);
         // getDown via highlight
         testWords = [];
         // find the top (e.g. if were on the second row move up to the first,
         // if we're on the last row move up till a box)
-        highlight("checkDown");
+        if (debug < 30){
+          highlight("checkDown");
+        }
+        else{
+          console.log("Debug = 30");
+        }
+
       }
     }
   })
@@ -171,7 +208,6 @@ function autoWord(solving){
 // moving around the board no argument is passed.
 function highlight(solving){
   console.log("highlight() + " + solving);
-  console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   // remove current highlighted area
   for (i in hLightedArea){
     if ($(hLightedArea[i]).css("background-color") !== "rgb(0, 0, 0)"){
@@ -256,7 +292,6 @@ function shadeBlack(row, column){
 
 function addNumbers(row, col){
   $("#boxes-box" + row + "-" + col).append("<div class='number'>" + sqNum + "</div>");
-  console.log("And here");
   sqNum += 1;
 }
 
@@ -269,7 +304,7 @@ function displayGrid(){
   for (i = 0; i < length; i++){
     $("#grid").append("<div class='row' id='row" + i + "'></div>");
     for (p = 0; p < width; p++){
-      $("#row" + i).append("<div class='boxes-box' id='boxes-box" + i + "-" + p + "'><input class='box' id='box" + i + "-" + p + "' maxlength='1'/></div>");
+      $("#row" + i).append("<div class='boxes-box' id='boxes-box" + i + "-" + p + "'><input class='box' id='box" + i + "-" + p + "' maxlength='2'/></div>");
       // Add in default black squares
       if (template1){
         if (i <= 2 || i >= 12){
@@ -301,7 +336,6 @@ function displayGrid(){
       }
       if ($("#box" + i + "-" + p).css("background-color") != "rgb(0, 0, 0)"){
         // add numbers
-        console.log($("#box" + (i - 1) + "-" + p).css("background-color"));
         if (i === 0 || p === 0 || $("#box" + (i) + "-" + (p - 1)).css("background-color") === "rgb(0, 0, 0)" || $("#box" + (i - 1) + "-" + p).css("background-color") === "rgb(0, 0, 0)"){
           addNumbers(i,p);
         }
