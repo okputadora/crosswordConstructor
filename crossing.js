@@ -28,6 +28,8 @@ var sqNum = 1;
 var prevFreq = 1000;
 var testWord;
 var debug = 0;
+var frequencies = [];
+var previousFreqs = [];
 
 // INTELLIGENCE
 function getPartialWord(){
@@ -64,6 +66,8 @@ function getCross(){
     data: ({word: partialWord}),
     success: function(data){
       data = parseInt(data);
+      var freq = [data, rowId, colId];
+      frequencies.push(data);
       // if this is the first check of a word
       if (lowestFreq === -1){
         lowestFreq = data;
@@ -104,19 +108,27 @@ function getCross(){
       // if this was the last check
       else if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
         // check if the previous word had a lower freuqency
-        if (lowestFreq > prevFreq){
-          //
+
+        for (var i in previousFreqs){
+          if (lowestFreq > previousFreqs[i][0]){
+            // find the coordinates of this previous word
+            rowId = previousFreqs[i][1];
+            colId = previousFreqs
+            // autoword the previous lowestfreuqency word
+
+          }
         }
-        // set this autowords prevFreq to final prev freq
+        previousFreqs = frequencies;
+        frequencies = [];
         console.log("found last row/col lowest Freq: " + lowestFreq);
         console.log("At row " + lowFreqRow + " and col " + lowFreqCol);
-        // if lowestFreq = 0 this word will not do. it must be replaced
-        // if (lowestFreq)
         // Fill in the lowest frequency word
         rowId = lowFreqRow;
         colId = lowFreqCol;
-        highlight("puzzle");
         lowestFreq = -1;
+
+        highlight("puzzle");
+
         // check if we've hit a black box or the end
         if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
 
@@ -191,12 +203,12 @@ function autoWord(solving){
         testWords = [];
         // find the top (e.g. if were on the second row move up to the first,
         // if we're on the last row move up till a box)
-        if (debug < 30){
-          highlight("checkDown");
-        }
-        else{
-          console.log("Debug = 30");
-        }
+        // if (debug < 30){
+        highlight("checkDown");
+        // }
+        // else{
+        //   console.log("Debug = 30");
+        // }
 
       }
     }
