@@ -35,31 +35,27 @@ var previousFreqs = [];
 function getPartialWord(){
   // find the highlighted word
   var partialWord = "";
+  var alreadyComplete = true;
   for (i in hLightedArea){
     var box = hLightedArea[i].toString();
     var letter = $(box).val();
     if (letter === "" || letter === "_"){
       letter = "_";
+      alreadyComplete = false;
     }
     partialWord += letter;
   }
-  return partialWord;
+  if (alreadyComplete){
+    return false;
+  }
+  else {return partialWord;}
 }
 function getCross(){
   console.log("getCross()");
   console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   partialWord = getPartialWord();
   // if there aren't any blanks we don't need to check this word
-  if (partialWord.indexOf("_") < 0){
-    if (enteringRow){
-      rowId += 1;
-    }
-    else{
-      colId += 1;
-    }
-    highlight("checkDown");
-  }
-  else{
+  if (partialWord){
     $.ajax({
     url: "get-down.php",
     type: "post",
@@ -69,6 +65,23 @@ function getCross(){
       var freq = [data, rowId, colId];
       frequencies.push(data);
       // if this is the first check of a word
+      // if there were no possible words
+      if (data === 0){
+        // reset the test word to the previous partial word
+        for (i in testWordArea){
+          $(testWordArea[i]).val(testWord.charAt(i));
+        }
+        // reset the row and column
+        var n = testWordArea[0].indexOf("-");
+        rowId = parseInt(testWordArea[0].substring(n-1));
+        colId = parseInt(testWordArea[0].substring(n+1));
+        if (!enteringRow){
+          enteringRow = true;
+        }
+        else {enteringRow = false};
+        lowestFreq = -1;
+        highlight("puzzle");
+      }
       if (lowestFreq === -1){
         lowestFreq = data;
         lowFreqRow = rowId;
@@ -83,39 +96,15 @@ function getCross(){
         lowFreqRow = rowId;
         lowFreqCol = colId;
       }
-      // if there were no possible words
-      if (data === 0){
-        console.log("row " + rowId + " col " + colId + " had 0 possible words");
-        // reset the test word to the previous partial word
-        for (i in testWordArea){
-          console.log(testWord);
-          $(testWordArea[i]).val(testWord.charAt(i));
-
-        }
-        // reset the row and column
-        var n = testWordArea[0].indexOf("-");
-        rowId = parseInt(testWordArea[0].substring(n-1));
-        colId = parseInt(testWordArea[0].substring(n+1));
-        console.log("Test word area: " + testWordArea[0]);
-        console.log("ROWID RES: " + rowId);
-        if (!enteringRow){
-          enteringRow = true;
-        }
-        else {enteringRow = false};
-        lowestFreq = -1;
-        highlight("puzzle");
-      }
       // if this was the last check
-      else if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
+      if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
         // check if the previous word had a lower freuqency
-
         for (var i in previousFreqs){
           if (lowestFreq > previousFreqs[i][0]){
             // find the coordinates of this previous word
             rowId = previousFreqs[i][1];
             colId = previousFreqs
             // autoword the previous lowestfreuqency word
-
           }
         }
         previousFreqs = frequencies;
@@ -126,36 +115,31 @@ function getCross(){
         rowId = lowFreqRow;
         colId = lowFreqCol;
         lowestFreq = -1;
-
         highlight("puzzle");
-
-        // check if we've hit a black box or the end
-        if($("#box" + rowId + "-" + colId).css("background-color") === "black"){
-
-        }
-        // check if we're already on the last row
-        else if (rowId === length){
-
-        }
-        // otherwise move on to the next word
-        else{
-          //
-        }
       }
-      // if this isn't the last check
-      else {
-        // move to the next column or row and check that
+      else{
         if (enteringRow){
           rowId += 1;
         }
-        else{
-          colId += 1;
-        }
+        else {colId += 1;}
         highlight("checkDown");
       }
     }
   })
 }
+  // if this word was already complete
+  else {
+    // if this is the last check;
+    if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
+      highlight("puzzle");
+    }
+    else {
+      if (enteringRow){
+        colId += 1;
+      }
+      else {rowId += 1;}
+      highlight("checkDown")}
+  }
 }
 
 function autoWord(solving){
@@ -165,54 +149,55 @@ function autoWord(solving){
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
-  testWord = partialWord;
-  var jsonString = JSON.stringify(triedWords);
-  $.ajax({
-    url: "auto-word.php",
-    type: "POST",
-    data: 'word='+ partialWord + '&blacklist=' + jsonString,
-    success: function(data){
-      var foundWord = data;
-      // enter the word into the grid
-      console.log("Found word: " + foundWord);
-      for (i in hLightedArea){
-        $(hLightedArea[i]).val(foundWord.charAt(i));
-      }
-      if (solving === "puzzle"){
-        // store this location on the grid so we can navigate to the next one
-        testWordArea = hLightedArea;
-        var len = testWordArea.length;
-        var n = testWordArea[len-1].indexOf("-");
-        var x = testWordArea[0].indexOf("-");
-        colId = parseInt(testWordArea[0].substring(x+1));
-        rowId = parseInt(testWordArea[0].substring(x-1));
-        if (enteringRow){
-          last = parseInt(testWordArea[len-1].substring(n+1));
-          console.log("last col: " + last);
-          enteringRow = false;
+  // if there's some blanks
+  if (partialWord){
+    var jsonString = JSON.stringify(triedWords);
+    $.ajax({
+      url: "auto-word.php",
+      type: "POST",
+      // blacklist is the words we've already tried
+      data: 'word='+ partialWord + '&blacklist=' + jsonString,
+      success: function(data){
+        var foundWord = data;
+        // enter the word into the grid
+        console.log("Found word: " + foundWord);
+        for (i in hLightedArea){
+          $(hLightedArea[i]).val(foundWord.charAt(i));
         }
-        else{
-          last = parseInt(testWordArea[len-1].substring(n-1))
-          console.log("last row: " + last);
-          enteringRow = true;
+        if (solving === "puzzle"){
+          // save as testword so we can revert back if need be
+          testWord = partialWord;
+          // store this location on the grid so we can navigate to the next one
+          testWordArea = hLightedArea;
+          var len = testWordArea.length;
+          var n = testWordArea[len-1].indexOf("-");
+          var x = testWordArea[0].indexOf("-");
+          // reset row and col id's to the first box
+          colId = parseInt(testWordArea[0].substring(x+1));
+          rowId = parseInt(testWordArea[0].substring(x-1));
+          if (enteringRow){
+            last = parseInt(testWordArea[len-1].substring(n+1));
+            console.log("last col: " + last);
+            enteringRow = false;
+          }
+          else{
+            last = parseInt(testWordArea[len-1].substring(n-1))
+            console.log("last row: " + last);
+            enteringRow = true;
+          }
+
+          // add to tried words
+          triedWords.push(foundWord);
+          // getDown via highlight
+          testWords = [];
+          // find the top (e.g. if were on the second row move up to the first,
+          // if we're on the last row move up till a box)
+          // if (debug < 30){
+          highlight("checkDown");
         }
-
-        // add to tried words
-        triedWords.push(foundWord);
-        // getDown via highlight
-        testWords = [];
-        // find the top (e.g. if were on the second row move up to the first,
-        // if we're on the last row move up till a box)
-        // if (debug < 30){
-        highlight("checkDown");
-        // }
-        // else{
-        //   console.log("Debug = 30");
-        // }
-
       }
-    }
-  })
+    })
+  }
 }
 // highlights the current word. hLightedArea is an array of the #box's the make
 // up the current word. takes one argument solving which can = "puzzle" or
@@ -245,7 +230,6 @@ function highlight(solving){
       }
     }
     // highlight until blackbox or end found
-
     for (x; x < width; x++){
       if ($("#box" + rowId + "-" + x).css("background-color") === "rgb(0, 0, 0)"){
         break;
@@ -294,6 +278,12 @@ function highlight(solving){
     autoWord("puzzle");
   }
   else if (solving === "checkDown"){
+    var n = hLightedArea[0].indexOf("-")
+    rowId = hLightedArea[0].substring(4, n);
+    rowId = parseInt(rowId);
+    console.log("ROW: " + rowId + " String: " + hLightedArea[0]);
+    colId = hLightedArea[0].substring(n+1);
+    colId = parseInt(colId);
     getCross();
   }
 }
