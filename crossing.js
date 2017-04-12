@@ -63,10 +63,11 @@ function getCross(){
     success: function(data){
       data = parseInt(data);
       var freq = [data, rowId, colId];
-      frequencies.push(data);
+      frequencies.push(freq);
       // if this is the first check of a word
       // if there were no possible words
       if (data === 0){
+        console.log("No possible words going across");
         // reset the test word to the previous partial word
         for (i in testWordArea){
           $(testWordArea[i]).val(testWord.charAt(i));
@@ -80,7 +81,9 @@ function getCross(){
         }
         else {enteringRow = false};
         lowestFreq = -1;
+        console.log("Retrying current partial word");
         highlight("puzzle");
+        return;
       }
       if (lowestFreq === -1){
         lowestFreq = data;
@@ -89,13 +92,13 @@ function getCross(){
       }
       // if this is the lowest frequency word
       else if (data <= lowestFreq){
-        // Store previous lowet frequency to check against next autoword
-        prevFreq = lowestFreq;
         // then replace current lowestFreq
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
+        console.log("low freq row: " + lowFreqRow + " col: " + lowFreqCol);
       }
+      console.log("data: " + data + " lowestfreq: " + lowestFreq);
       // if this was the last check
       if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
         // check if the previous word had a lower freuqency
@@ -103,8 +106,17 @@ function getCross(){
           if (lowestFreq > previousFreqs[i][0]){
             // find the coordinates of this previous word
             rowId = previousFreqs[i][1];
-            colId = previousFreqs
+            colId = previousFreqs[i][2];
             // autoword the previous lowestfreuqency word
+            console.log("last word had a lower freq");
+            console.log("entering that row at " + lowFreqRow + " " + lowFreqCol);
+            if (enteringRow){
+              enteringRow = false;
+            }
+            else{enteringRow = true;}
+            highlight("puzzle");
+            break;
+            return;
           }
         }
         previousFreqs = frequencies;
@@ -115,13 +127,15 @@ function getCross(){
         rowId = lowFreqRow;
         colId = lowFreqCol;
         lowestFreq = -1;
+        previousFreqs = [];
+        console.log("entering row: " + enteringRow);
         highlight("puzzle");
       }
       else{
         if (enteringRow){
-          rowId += 1;
+          goDown();
         }
-        else {colId += 1;}
+        else {goRight();}
         highlight("checkDown");
       }
     }
@@ -135,17 +149,17 @@ function getCross(){
     }
     else {
       if (enteringRow){
-        colId += 1;
+        console.log("Already filled in");
+        goDown();
+        console.log(rowId);
       }
-      else {rowId += 1;}
-      highlight("checkDown")}
+      else {goRight();}
+      highlight("checkDown")};
   }
 }
 
 function autoWord(solving){
   debug += 1;
-  console.log("autoWord() + " + solving);
-  console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
   //return focus to the board
   // $(idInFocus).focus();
   partialWord = getPartialWord();
@@ -197,6 +211,15 @@ function autoWord(solving){
         }
       }
     })
+  }
+  else{
+    if (enteringRow){
+      goDown();
+    }
+    else{
+      goRight();
+    }
+    highlight("puzzle");
   }
 }
 // highlights the current word. hLightedArea is an array of the #box's the make
@@ -278,12 +301,12 @@ function highlight(solving){
     autoWord("puzzle");
   }
   else if (solving === "checkDown"){
-    var n = hLightedArea[0].indexOf("-")
-    rowId = hLightedArea[0].substring(4, n);
-    rowId = parseInt(rowId);
-    console.log("ROW: " + rowId + " String: " + hLightedArea[0]);
-    colId = hLightedArea[0].substring(n+1);
-    colId = parseInt(colId);
+    // var n = hLightedArea[0].indexOf("-")
+    // rowId = hLightedArea[0].substring(4, n);
+    // rowId = parseInt(rowId);
+    // console.log("ROW: " + rowId + " String: " + hLightedArea[0]);
+    // colId = hLightedArea[0].substring(n+1);
+    // colId = parseInt(colId);
     getCross();
   }
 }
@@ -363,7 +386,7 @@ function goLeft(elem){
     colId = width - 1;
   }
   else{
-    colId = colId - 1;
+    colId -= 1;
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
@@ -411,7 +434,7 @@ function goDown(){
     rowId = 0;
   }
   else{
-    rowId = rowId + 1;
+    rowId += 1;
   }
   // if black move again
   if ($("#box" + rowId + "-" + colId).css("background-color") === "rgb(0, 0, 0)"){
