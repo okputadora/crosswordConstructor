@@ -50,6 +50,52 @@ function getPartialWord(){
   }
   else {return partialWord;}
 }
+
+function lastCheck(){
+  // check if the previous word had a lower freuqency
+  console.log("previous Frequencies: " + previousFreqs);
+  var foundPrevFreq = false;
+  for (var i in previousFreqs){
+    console.log("previous FREAKS " + previousFreqs[i][0]);
+    if (lowestFreq > previousFreqs[i][0]){
+      foundPrevFreq = true;
+      lowestFreq = previousFreqs[i][0];
+      // find the coordinates of this previous word
+      rowId = previousFreqs[i][1];
+      colId = previousFreqs[i][2];
+    }
+  }
+  if (foundPrevFreq == true){
+    if (enteringRow){
+      enteringRow = false;
+    }
+    else{enteringRow = true;}
+    frequencies = [];
+    console.log("last word had a lower freq");
+    console.log("entering that row at " + rowId + " " + colId);
+    highlight("puzzle");
+  }
+  else{
+    previousFreqs = [];
+    previousFreqs = frequencies;
+    console.log("previous Frequencies: " + previousFreqs);
+    frequencies = [];
+    console.log("found last row/col lowest Freq: " + lowestFreq);
+    console.log("At row " + lowFreqRow + " and col " + lowFreqCol);
+    // Fill in the lowest frequency word
+    rowId = lowFreqRow;
+    colId = lowFreqCol;
+    lowestFreq = -1;
+    // remove this freuqency from the previous
+    var index = previousFreqs.indexOf(freqToRemove);
+    console.log("freqtoremove: " + freqToRemove + " + " + index);
+    previousFreqs.splice(index, 1);
+    console.log("previouse freqs: " + previousFreqs);
+    console.log("entering row: " + enteringRow);
+    highlight("puzzle");
+  }
+}
+
 function getCross(){
   console.log("getCross()");
   console.log("row: " + rowId + " col: " + colId + " entering row: " + enteringRow);
@@ -64,10 +110,11 @@ function getCross(){
       data = parseInt(data);
       var freq = [data, rowId, colId];
       frequencies.push(freq);
+      console.log("Frequencies: " + frequencies);
       // if this is the first check of a word
       // if there were no possible words
       if (data === 0){
-        console.log("No possible words going across");
+        console.log("No possible words going across at row" + rowId + " col " + colId);
         // reset the test word to the previous partial word
         for (i in testWordArea){
           $(testWordArea[i]).val(testWord.charAt(i));
@@ -82,6 +129,7 @@ function getCross(){
         else {enteringRow = false};
         lowestFreq = -1;
         console.log("Retrying current partial word");
+        frequencies = [];
         highlight("puzzle");
         return;
       }
@@ -89,6 +137,8 @@ function getCross(){
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
+        freqToRemove = freq;
+        console.log("Freq to remove: ");
       }
       // if this is the lowest frequency word
       else if (data <= lowestFreq){
@@ -96,42 +146,17 @@ function getCross(){
         lowestFreq = data;
         lowFreqRow = rowId;
         lowFreqCol = colId;
+        freqToRemove = freq;
         console.log("low freq row: " + lowFreqRow + " col: " + lowFreqCol);
       }
       console.log("data: " + data + " lowestfreq: " + lowestFreq);
+
       // if this was the last check
       if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
-        // check if the previous word had a lower freuqency
-        for (var i in previousFreqs){
-          if (lowestFreq > previousFreqs[i][0]){
-            // find the coordinates of this previous word
-            rowId = previousFreqs[i][1];
-            colId = previousFreqs[i][2];
-            // autoword the previous lowestfreuqency word
-            console.log("last word had a lower freq");
-            console.log("entering that row at " + lowFreqRow + " " + lowFreqCol);
-            if (enteringRow){
-              enteringRow = false;
-            }
-            else{enteringRow = true;}
-            highlight("puzzle");
-            break;
-            return;
-          }
-        }
-        previousFreqs = frequencies;
-        frequencies = [];
-        console.log("found last row/col lowest Freq: " + lowestFreq);
-        console.log("At row " + lowFreqRow + " and col " + lowFreqCol);
-        // Fill in the lowest frequency word
-        rowId = lowFreqRow;
-        colId = lowFreqCol;
-        lowestFreq = -1;
-        previousFreqs = [];
-        console.log("entering row: " + enteringRow);
-        highlight("puzzle");
+        lastCheck();
       }
       else{
+        // I THINK THESE MULTIPLE FUNCTION CALLS ARE FUCKING IT UP
         if (enteringRow){
           goDown();
         }
@@ -145,7 +170,7 @@ function getCross(){
   else {
     // if this is the last check;
     if ((colId === last & !enteringRow) || (rowId === last & enteringRow)){
-      highlight("puzzle");
+      lastCheck();
     }
     else {
       if (enteringRow){
@@ -165,6 +190,7 @@ function autoWord(solving){
   partialWord = getPartialWord();
   // if there's some blanks
   if (partialWord){
+    console.log("partial found word: " + partialWord);
     var jsonString = JSON.stringify(triedWords);
     $.ajax({
       url: "auto-word.php",
@@ -173,8 +199,13 @@ function autoWord(solving){
       data: 'word='+ partialWord + '&blacklist=' + jsonString,
       success: function(data){
         var foundWord = data;
+        if (foundWord === 'okputadora'){
+          console.log("Found word: NOTHING FOUND");
+          // revise a prior word
+
+        }
         // enter the word into the grid
-        console.log("Found word: " + foundWord);
+        console.log("Found word: " + foundWord + " " + typeof foundWord);
         for (i in hLightedArea){
           $(hLightedArea[i]).val(foundWord.charAt(i));
         }
@@ -183,9 +214,11 @@ function autoWord(solving){
           testWord = partialWord;
           // store this location on the grid so we can navigate to the next one
           testWordArea = hLightedArea;
+          console.log("testWord area: " + testWordArea);
           var len = testWordArea.length;
           var n = testWordArea[len-1].indexOf("-");
           var x = testWordArea[0].indexOf("-");
+          var y = testWordArea[len-1].indexOf("x");
           // reset row and col id's to the first box
           colId = parseInt(testWordArea[0].substring(x+1));
           rowId = parseInt(testWordArea[0].substring(x-1));
@@ -195,18 +228,14 @@ function autoWord(solving){
             enteringRow = false;
           }
           else{
-            last = parseInt(testWordArea[len-1].substring(n-1))
+            last = parseInt(testWordArea[len-1].substring((y+1), n))
             console.log("last row: " + last);
             enteringRow = true;
           }
-
           // add to tried words
           triedWords.push(foundWord);
           // getDown via highlight
           testWords = [];
-          // find the top (e.g. if were on the second row move up to the first,
-          // if we're on the last row move up till a box)
-          // if (debug < 30){
           highlight("checkDown");
         }
       }
