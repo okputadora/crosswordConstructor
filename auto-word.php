@@ -7,21 +7,20 @@
   $count = mysqli_num_rows($response);
   $answer = 'okputadora';
   if ($count == 0){
-    $answer = '';
-    echo "okputadora";
+    echo "nothing in database that matches partial word";
   }
   while ($row = mysqli_fetch_array($response)){
-    $answer = $row["answer"];
-    if(empty($triedWords)){
-      echo $answer;
-      break;
-    }
-    if (in_array($answer, $triedWords)){
+
+    if (in_array($row["answer"], $triedWords)){
       continue;
     }
     else{
+      $answer = $row["answer"];
       echo $answer;
       break;
     }
+  }
+  if ($answer == 'okputadora'){
+    echo "OKPUTADORA";
   }
 ?>
