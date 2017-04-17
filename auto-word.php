@@ -1,8 +1,9 @@
 <?php include_once("connect.php");
   $partialWord = $_POST["word"];
   $triedWords = json_decode(stripslashes($_POST["blacklist"]));
+  $queryPart = $_POST["addQuery"];
   // could i add the blacklist to the query so theres fewer results to filter through
-  $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "'";
+  $query = "SELECT * FROM nytclues WHERE (answer LIKE '" .  $partialWord . "'") + $queryPart;
   $response = @mysqli_query($dbc, $query);
   $count = mysqli_num_rows($response);
   $answer = 'okputadora';

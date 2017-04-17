@@ -193,9 +193,11 @@ function autoWord(solving){
   // $(idInFocus).focus();
   if (solving == "revise"){
     partialWord = testWord;
+    var query = revQuery;
   }
   else{
     partialWord = getPartialWord();
+    var query = '';
   }
   // if there's some blanks
   if (partialWord){
@@ -205,15 +207,19 @@ function autoWord(solving){
       url: "auto-word.php",
       type: "POST",
       // blacklist is the words we've already tried
-      data: 'word='+ partialWord + '&blacklist=' + jsonTriedWords,
+      data: 'word='+ partialWord + '&blacklist=' + jsonTriedWords '&addQuery=' + query,
       success: function(data){
         foundWord = data;
         // if the database had no words satisfying the criteria
         if (foundWord === 'OKPUTADORA'){
           // revise the prior word
-          triedWords = [];
-          // we need to store alll entered words so that we can keep
-          // going back if need be
+          // 1. locate the problematic letter
+
+          // 2. enter it into a partial query
+          // this current definition only works for last letter
+          // need it to be dynamic
+          revQuery = " AND (answer not REGEXP '" + xLet + "$')"
+          // 3. retrieve the location of the previous word
           var len = enteredWords.length;
           triedWords.push(enteredWords[len-1][0]);
           testWord = enteredWords[len-1][1];
@@ -224,6 +230,7 @@ function autoWord(solving){
           console.log("HAVE TO REVISE: " + enteredWords);
           console.log("Revise coords: " + testWord + " " + enteredWords[len-1][0]);
           // remove from enteredWords
+          // 4. delete this entry now that it is the current word and not most recent
           enteredWords.splice(len - 1);
           console.log("revise after splice: " + enteredWords);
           highlight("revise");
