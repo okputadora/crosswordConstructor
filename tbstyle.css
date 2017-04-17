@@ -1,6 +1,6 @@
 #toolbar{
   width: 100%;
-  background-color: white;
+  background-color: whitesmoke;
   height: 100px;
   display: flex;
   align-items: center;
@@ -23,7 +23,7 @@
   transition: .5s;
   margin-right: 80px;
   justify-content: space-around;
-  width: 33%;
+  width: 53%;
 }
 
 .tool{
@@ -31,15 +31,17 @@
   padding: 2px;
   border: 1px solid black;
   justify-content: flex-end;
+  background-color: white;
 }
 
-.tool > div{
+.button{
   margin: 5px;
   padding: 5px;
   border: 1px solid black;
   min-width: 80px;
   text-align: center;
   cursor: pointer;
+  background-color: whitesmoke;
 }
 
 #dir-row{

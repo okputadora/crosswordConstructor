@@ -6,6 +6,7 @@
   $response = @mysqli_query($dbc, $query);
   $count = mysqli_num_rows($response);
   $answer = 'okputadora';
+  // if theres no words
   if ($count == 0){
     echo "nothing in database that matches partial word";
   }
@@ -20,6 +21,7 @@
       break;
     }
   }
+  // if there are words but they;ve all been blacklisted
   if ($answer == 'okputadora'){
     echo "OKPUTADORA";
   }

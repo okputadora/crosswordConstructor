@@ -212,13 +212,20 @@ function autoWord(solving){
         if (foundWord === 'OKPUTADORA'){
           // revise the prior word
           triedWords = [];
-          triedWords.push(previousFoundWord[0]);
-          testWord = previousFoundWord[1];
-          rowId = previousFoundWord[2];
-          colId = previousFoundWord[3];
-          enteringRow = previousFoundWord[4];
-          last = previousFoundWord[5];
-          console.log("HAVE TO REVISE: " + previousFoundWord);
+          // we need to store alll entered words so that we can keep
+          // going back if need be
+          var len = enteredWords.length;
+          triedWords.push(enteredWords[len-1][0]);
+          testWord = enteredWords[len-1][1];
+          rowId = enteredWords[len-1][2];
+          colId = enteredWords[len-1][3];
+          enteringRow = enteredWords[len-1][4];
+          last = enteredWords[len-1][5];
+          console.log("HAVE TO REVISE: " + enteredWords);
+          console.log("Revise coords: " + testWord + " " + enteredWords[len-1][0]);
+          // remove from enteredWords
+          enteredWords.splice(len - 1);
+          console.log("revise after splice: " + enteredWords);
           highlight("revise");
         }
         else{
