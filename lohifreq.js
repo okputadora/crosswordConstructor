@@ -7,22 +7,20 @@
 function getPartialWord(hLightedArea){
   var partialWord = "";
   var alreadyComplete = true;
+  var boxIdsAndVals = {};
   for (i in hLightedArea){
-    // save the crossing string to an array
-    xingWord = getCross(hLightedArea);
-    xingWords.push(xingWord);
     var box = hLightedArea[i].toString();
     var letter = $(box).val();
     if (letter === "" || letter === "_"){
       letter = "_";
       alreadyComplete = false;
     }
-    partialWord += letter;
+    boxIdsAndValues[hLightedArea[i]] = letter;
   }
   if (alreadyComplete){
     return false;
   }
-  else {return partialWord;}
+  else {return boxIdsAndValues;}
 }
 
 // takes a string of the box is ("#box2-10") and return the row and col id's
@@ -37,7 +35,7 @@ function getRowColIds(box){
 // takes a partial word, words that have already been tried, and any additional
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
-function autoWord(partialWord, crossingWords, jsonTriedWords, query){
+function autoWord(partialWord, crossingWords, triedWords, query){
   $.ajax({
     // see this file for description
     url: "auto-word.php",
@@ -62,12 +60,13 @@ function togRowCol(enteringRow){
 // filter through a word area and return the crossing word areas
 // for each letter
 function getCrosses(wordArea, direction){
-  crosses = [];
+  var crosses = {};
   direction = togRowCol(direction)
-  for (var x in WordArea){
-    var rowCol = getRowColIds(x);
+  for (var x in wordArea){
+    var rowCol = getRowColIds(wordArea[x]);
     var crossArea = wordArea(rowCol[0], rowCol[1], direction);
-    crosses.push(crossArea);
+    var crossObj = partialWord(crossArea);
+    crosses[x] = crossObj;
   }
   return crosses;
 }
@@ -82,12 +81,15 @@ function autoPuzzle(){
     var optimizer = 10;
     // while the puzzle is unsolved...try to solve it
     while puzzle
-    partialWord = getPartialWord(hLightedArea);
-    crossingWords = getCrosses(hLightedArea);
+    // get a JSON pairing box id's to values of boxes for the partialWord and
+    // corresponding crossing words
+    var partialWord = getPartialWord(hLightedArea);
+    var crossings = getCrosses(hLightedArea);
+
     // get downs from partial word
     var word = autoWord(partialWord, crossingWords);
     // change highlighted area to next word space
-    
+
     // check if we're done
 }
 
