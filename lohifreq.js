@@ -7,7 +7,6 @@
 function getPartialWord(hLightedArea){
   var partialWord = "";
   var alreadyComplete = true;
-  var boxIdsAndVals = {};
   for (i in hLightedArea){
     var box = hLightedArea[i].toString();
     var letter = $(box).val();
@@ -15,12 +14,12 @@ function getPartialWord(hLightedArea){
       letter = "_";
       alreadyComplete = false;
     }
-    boxIdsAndValues[hLightedArea[i]] = letter;
+    partialWord += letter;
   }
   if (alreadyComplete){
     return false;
   }
-  else {return boxIdsAndValues;}
+  else {return partialWord;}
 }
 
 // takes a string of the box is ("#box2-10") and return the row and col id's
@@ -32,16 +31,28 @@ function getRowColIds(box){
   var col = parseInt(box.substring((n+1);
   return [row, col];
 }
+// find the intersection of crossing Words and partial word so that when
+// we query the database and get a complete word returned we know where to
+// enter it into the crossing words to check for their freqs
+function getIntersection(wordArea, crossWord){
+  var box = wordArea[0];
+  for (var i in crossWordAreas){
+    if (box === crossWordAreas[i]){
+      // intersection found
+      return i;
+    }
+  }
 // takes a partial word, words that have already been tried, and any additional
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
-function autoWord(partialWord, crossingWords, triedWords, query){
+function autoWord(partialWord, crossingWords, intersection, triedWords, query){
   $.ajax({
     // see this file for description
     url: "auto-word.php",
     type: "POST",
     // blacklist is the words we've already tried
-    data: 'word='+ partialWord + '&blacklist=' + jsonTriedWords + '&addQuery=' + query,
+    data: 'word='+ partialWord + '&crosses' + crossingWords + '&inter' + intersection +
+          '&blacklist=' + jsonTriedWords + '&addQuery=' + query,
     success: function(data){
       foundWord = data;
       return foundWord;
@@ -59,14 +70,13 @@ function togRowCol(enteringRow){
 
 // filter through a word area and return the crossing word areas
 // for each letter
-function getCrosses(wordArea, direction){
-  var crosses = {};
+function getCrossAreas(wordArea, direction){
+  var crosses = [];
   direction = togRowCol(direction)
   for (var x in wordArea){
     var rowCol = getRowColIds(wordArea[x]);
     var crossArea = wordArea(rowCol[0], rowCol[1], direction);
-    var crossObj = partialWord(crossArea);
-    crosses[x] = crossObj;
+    crosses.push(crossArea);
   }
   return crosses;
 }
@@ -81,13 +91,18 @@ function autoPuzzle(){
     var optimizer = 10;
     // while the puzzle is unsolved...try to solve it
     while puzzle
-    // get a JSON pairing box id's to values of boxes for the partialWord and
-    // corresponding crossing words
     var partialWord = getPartialWord(hLightedArea);
-    var crossings = getCrosses(hLightedArea);
-
+    var crossingAreas = getCrossAreas(hLightedArea);
+    // get crossing partial words
+    var crossWord = "";
+    var crossingWords = [];
+    for (var i in crossingAreas){
+      crossWord = getPartialWord(crossingAreas[i]);
+      crossingWords.push(crossWord);
+    }
+    var intersection = getIntersection(hLightedArea, crossingAreas[0]);
     // get downs from partial word
-    var word = autoWord(partialWord, crossingWords);
+    var word = autoWord(partialWord, crossingWords, intersection);
     // change highlighted area to next word space
 
     // check if we're done
