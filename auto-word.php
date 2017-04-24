@@ -26,12 +26,12 @@
         for ($i = 0; $i <= $strlen; $i++){
           $char = substr($str, $i, 1);
           // the line below is in JS need PHP equiv
-          $crosses[$i].charAt($index) = $char;
+          $altCross = substr_replace($crosses[$i],$char,$index,1);
           // check the frequency of this word
-          $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $crosses[$i] . "'";
+          $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $altCross . "'";
           $crossResponse = @mysqli_query($dbc, $query2);
           $crossCount = mysqli_num_rows($crossResponse);
-          $freqs.push(crosscount)
+          array_push($freqs, $crossCount);
         }
         // check the crossing words
         $ticker += 1;
