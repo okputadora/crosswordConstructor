@@ -84,7 +84,10 @@ function togRowCol(enteringRow){
 // for each letter
 function getCrossAreas(wordArea, direction){
   var crosses = [];
-  direction = togRowCol(direction)
+  console.log("GC " + direction);
+  direction = togRowCol(direction);
+  console.log("GC " + direction);
+
   for (var x in wordArea){
     var rowCol = getRowColIds(wordArea[x]);
     var crossArea = getWordArea(rowCol[0], rowCol[1], direction);
@@ -102,7 +105,7 @@ function autoPuzzle(){
     // an array that point to the id's of the squares in the HTML. E.g.,
     // "#box0-0" is the top left square
     hLightedArea = getWordArea(row, col, enteringRow);
-    console.log("hlight: " + hLightedArea);
+    console.log("AP hlight: " + hLightedArea);
     // determines how many words to search through before picking the one with
     // the highest frequency crossing words
     var optimizer = 10;
@@ -110,8 +113,8 @@ function autoPuzzle(){
     // while puzzle
     var partialWord = getPartialWord(hLightedArea);
     console.log(partialWord);
-    var crossingAreas = getCrossAreas(hLightedArea);
-    console.log("crosses " + crossingAreas);
+    var crossingAreas = getCrossAreas(hLightedArea, enteringRow);
+    console.log("AP crosses " + crossingAreas);
     // get crossing partial words
     var crossWord = "";
     var crossingWords = [];
@@ -119,13 +122,13 @@ function autoPuzzle(){
       crossWord = getPartialWord(crossingAreas[i]);
       crossingWords.push(crossWord);
     }
-    console.log("crossingWords: " + crossingWords);
+    console.log("AP crossingWords: " + crossingWords);
     // this seems unnecessary -- shoulkd be able to find the intersection
     // when getting crosses
     var intersection = getIntersection(hLightedArea, crossingAreas[0]);
     // get downs from partial word
     autoWord(partialWord, crossingWords, intersection, function(word){
-      console.log(word);
+      console.log("AP " + word);
     });
     // change highlighted area to next word space
 
