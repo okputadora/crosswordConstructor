@@ -28,7 +28,7 @@ function getRowColIds(box){
   var x = box.indexOf("-");
   var y = box.indexOf("x");
   var row = parseInt(box.substring((y+1), n));
-  var col = parseInt(box.substring((n+1);
+  var col = parseInt(box.substring((n+1)));
   return [row, col];
 }
 // find the intersection of crossing Words and partial word so that when
@@ -36,28 +36,38 @@ function getRowColIds(box){
 // enter it into the crossing words to check for their freqs
 function getIntersection(wordArea, crossWord){
   var box = wordArea[0];
-  for (var i in crossWordAreas){
-    if (box === crossWordAreas[i]){
+  for (var i in crossWord){
+    if (box === crossWord[i]){
       // intersection found
       return i;
     }
   }
+}
 // takes a partial word, words that have already been tried, and any additional
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
-function autoWord(partialWord, crossingWords, intersection, triedWords, query){
+function autoWord(partialWord, crossingWords, intersection, callback){
+  console.log(partialWord);
+  console.log(crossingWords);
+  console.log(intersection);
   $.ajax({
     // see this file for description
     url: "auto-word.php",
     type: "POST",
     // blacklist is the words we've already tried
-    data: 'word='+ partialWord + '&crosses' + crossingWords + '&inter' + intersection +
-          '&blacklist=' + jsonTriedWords + '&addQuery=' + query,
+    data: {word: partialWord, crosses: crossingWords, inter: intersection},
     success: function(data){
-      foundWord = data;
-      return foundWord;
+      var foundWord = data;
+      console.log(foundWord);
+      console.log("success");
+      callback(foundWord);
+    },
+    error: function(xhr, parsererror, errorThrown){
+       alert('request failed');
+       console.log(textStatus);
     }
-  }
+  })
+  console.log("failed");
 }
 
 function togRowCol(enteringRow){
@@ -75,22 +85,26 @@ function getCrossAreas(wordArea, direction){
   direction = togRowCol(direction)
   for (var x in wordArea){
     var rowCol = getRowColIds(wordArea[x]);
-    var crossArea = wordArea(rowCol[0], rowCol[1], direction);
+    var crossArea = getWordArea(rowCol[0], rowCol[1], direction);
     crosses.push(crossArea);
   }
   return crosses;
 }
 
 function autoPuzzle(){
+  // should write a function for this to pick the hardest word first
+  row = 0;
+  col = 0;
+  enteringRow = true;
   // NEED TO DEFINE ENTERING ROW;
     // an array that point to the id's of the squares in the HTML. E.g.,
     // "#box0-0" is the top left square
-    hLightedArea = wordArea(row, col, enteringRow);
+    hLightedArea = getWordArea(row, col, enteringRow);
     // determines how many words to search through before picking the one with
     // the highest frequency crossing words
     var optimizer = 10;
     // while the puzzle is unsolved...try to solve it
-    while puzzle
+    // while puzzle
     var partialWord = getPartialWord(hLightedArea);
     var crossingAreas = getCrossAreas(hLightedArea);
     // get crossing partial words
@@ -100,9 +114,13 @@ function autoPuzzle(){
       crossWord = getPartialWord(crossingAreas[i]);
       crossingWords.push(crossWord);
     }
+    // this seems unnecessary -- shoulkd be able to find the intersection
+    // when getting crosses
     var intersection = getIntersection(hLightedArea, crossingAreas[0]);
     // get downs from partial word
-    var word = autoWord(partialWord, crossingWords, intersection);
+    autoWord(partialWord, crossingWords, intersection, function(word){
+      console.log(word);
+    });
     // change highlighted area to next word space
 
     // check if we're done
@@ -113,19 +131,19 @@ function autoPuzzle(){
 function getWordArea(r, c, direction){
   var begFound = false;
   var endFound = false;
-  var str = "#box" + r + "-" + c;
-  var wordArea = [str];
+  var box = "#box" + r + "-" + c;
+  var wordArea = [box];
   // increment
   var r2 = r + 1;
   var c2 = c + 1;
   c -= 1;
   r -= 1;
   do{
-    // if the box is white
-    if($("#box" + r + "-" + c).css("background-color") === "rgb(255, 255, 255)"){
+    // if this box is white
+    if ($("#box" + r + "-" + c).css("background-color") === "rgb(255, 255, 255)"){
         // add to beginning of the array
-        str = "#box" + r "-" + c;
-        wordArea.unshift(str);
+        box = "#box" + r + "-" + c;
+        wordArea.unshift(box);
         if (direction == true){
           c -= 1;
         }
@@ -139,8 +157,8 @@ function getWordArea(r, c, direction){
     // or if this box is white
     if ($("#box" + r2 + "-" + c2).css("background-color") === "rgb(255, 255, 255)"){
       // add it to the end of the array
-      str = "#box" + r2 + "-" + c2;
-      wordArea.push(str);
+      box = "#box" + r2 + "-" + c2;
+      wordArea.push(box);
       if (direction == true){
         c2 += 1;
       }
@@ -151,6 +169,7 @@ function getWordArea(r, c, direction){
     else{
       endFound = true;
     }
+  }
   while (begFound == false && endFound == false);
   return wordArea;
 }
@@ -158,7 +177,13 @@ function getWordArea(r, c, direction){
 function highlight(wordArea){
 
 }
+function addNumbers(row, col, sqNum){
+  $("#boxes-box" + row + "-" + col).append("<div class='number'>" + sqNum + "</div>");
+  sqNum += 1;
+}
+
 function displayGrid(){
+  var sqNum = 1;
   length = $("#len").val();
   width = $("#wid").val();
   $("#premade").css("display", "none");
@@ -200,21 +225,12 @@ function displayGrid(){
       if ($("#box" + i + "-" + p).css("background-color") != "rgb(0, 0, 0)"){
         // add numbers
         if (i === 0 || p === 0 || $("#box" + (i) + "-" + (p - 1)).css("background-color") === "rgb(0, 0, 0)" || $("#box" + (i - 1) + "-" + p).css("background-color") === "rgb(0, 0, 0)"){
-          addNumbers(i,p);
+          $("#boxes-box" + i + "-" + p).append("<div class='number'>" + sqNum + "</div>");
+          sqNum += 1;
         }
       }
     }
   }
-  // set focus
-  $("#box0-0").focus();
-  // highlight first row
-  highlight();
-  highlightBox();
-}
-
-function highlightBox(){
-  $("input:focus").css("background-color", "#FFEDC3");
-  idInFocus = "#box" + rowId + "-" + colId;
 }
 
 function goLeft(elem){
@@ -231,7 +247,7 @@ function goLeft(elem){
     goLeft(elem);
   }
   $("#box" + rowId + "-" + colId).focus();
-  highlight();
+   // highlight();
 }
 function goUp(){
   rowId = parseInt(rowId);
@@ -247,7 +263,7 @@ function goUp(){
     goUp();
   }
   $("#box" + rowId + "-" + colId).focus();
-  highlight();
+   // highlight();
 }
 function goRight(elem){
   colId = parseInt(colId);
@@ -263,7 +279,7 @@ function goRight(elem){
     goRight(elem);
   }
   $("#box" + rowId + "-" + colId).focus();
-  highlight();
+   // highlight();
 }
 function goDown(){
   rowId = parseInt(rowId);
@@ -279,7 +295,7 @@ function goDown(){
     goDown();
   }
   $("#box" + rowId + "-" + colId).focus();
-  highlight();
+   // highlight();
 }
 
 function toggleRow(){
@@ -287,8 +303,8 @@ function toggleRow(){
   $("#dir-row").css("background-color", "#B2DAE7");
   $("#dir-col").css("background-color", "whitesmoke");
   $("#box" + rowId + "-" + colId).focus()
-  highlight();
-  highlightBox();
+   // highlight();
+   // highlightbox();
 }
 
 function toggleCol(){
@@ -296,8 +312,8 @@ function toggleCol(){
   $("#dir-col").css("background-color", "#B2DAE7");
   $("#dir-row").css("background-color", "whitesmoke");
   $("#box" + rowId + "-" + colId).focus()
-  highlight();
-  highlightBox();
+   // highlight();
+   // highlightbox();
 }
 
 // when all is loaded
@@ -333,8 +349,8 @@ $(document).ready(function(){
       var n = this.id.indexOf("-");
       rowId = this.id.substring(3, n);
       colId = this.id.substring(n+1);
-      highlight();
-      highlightBox();
+       // highlight();
+       // highlightbox();
     });
     $('#grid').on("keypress", ".box", function(){
       if (event.which === 49){
@@ -351,69 +367,69 @@ $(document).ready(function(){
         toggleCol();
         return false;
       }
-    });
+    })
     $('#grid').on("keydown", ".box", function(){
       // toggle color
 
-      $(this).css("background-color", "white");
-      // if keystrike on main screen
-      if ($("#crossword").css("display") === "flex"){
-        // ids of current row and column
-        var n = this.id.indexOf("-");
-        rowId = this.id.substring(3, n);
-        colId = this.id.substring(n+1);
-        var thisEl = this;
-        // if an arrow key is being pressed
-        // left
-        if(event.which === 37){
-            goLeft(thisEl);
-        }
-        // up
-        else if(event.which === 38){
-          goUp();
-        }
-        // right
-        else if(event.which === 39){
-          goRight(thisEl);
-        }
-        // down
-        else if(event.which === 40){
-          goDown();
-        }
-        // space
-        else if (event.which === 32){
-          $("#box" + rowId + "-" + colId).css("background-color", "black");
-          if (enteringRow){
-            goRight(thisEl);
-          }
-          else{
-            goDown(thisEl);
-          }
-
-        }
-        // backspace
-        else if (event.which === 8){
-          // if box is full
-          if ($(this).val() !== ""){
-            $(this).val("");
-          }
-          else if (enteringRow && $(this).val() === ""){
-            goLeft(thisEl);
-          }
-          else{
-            goUp();
-          }
-        }
-        else if(event.which >= 65 && event.which <= 90){
-          if (enteringRow){
-            goRight(thisEl);
-          }
-          else{
-            goDown(thisEl);
-          }
-        }
-      }
-      highlightBox();
+      // $(this).css("background-color", "white");
+      // // if keystrike on main screen
+      // if ($("#crossword").css("display") === "flex"){
+      //   // ids of current row and column
+      //   var n = this.id.indexOf("-");
+      //   rowId = this.id.substring(3, n);
+      //   colId = this.id.substring(n+1);
+      //   var thisEl = this;
+      //   // if an arrow key is being pressed
+      //   // left
+      //   if(event.which === 37){
+      //       goLeft(thisEl);
+      //   }
+      //   // up
+      //   else if(event.which === 38){
+      //     goUp();
+      //   }
+      //   // right
+      //   else if(event.which === 39){
+      //     goRight(thisEl);
+      //   }
+      //   // down
+      //   else if(event.which === 40){
+      //     goDown();
+      //   }
+      //   // space
+      //   else if (event.which === 32){
+      //     $("#box" + rowId + "-" + colId).css("background-color", "black");
+      //     if (enteringRow){
+      //       goRight(thisEl);
+      //     }
+      //     else{
+      //       goDown(thisEl);
+      //     }
+      //
+      //   }
+      //   // backspace
+      //   else if (event.which === 8){
+      //     // if box is full
+      //     if ($(this).val() !== ""){
+      //       $(this).val("");
+      //     }
+      //     else if (enteringRow && $(this).val() === ""){
+      //       goLeft(thisEl);
+      //     }
+      //     else{
+      //       goUp();
+      //     }
+      //   }
+      //   else if(event.which >= 65 && event.which <= 90){
+      //     if (enteringRow){
+      //       goRight(thisEl);
+      //     }
+      //     else{
+      //       goDown(thisEl);
+      //     }
+      //   }
+      // }
+       // highlightbox();
     })
 
 
@@ -433,8 +449,6 @@ $(document).ready(function(){
       $("#box0-0").focus();
       rowId = 0;
       colId = 6;
-      enteringRow = false;
-      highlight("puzzle");
+      autoPuzzle(rowId, colId, true);
     })
-
 })
