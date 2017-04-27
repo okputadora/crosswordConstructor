@@ -29,6 +29,8 @@ function getRowColIds(box){
   var y = box.indexOf("x");
   var row = parseInt(box.substring((y+1), n));
   var col = parseInt(box.substring((n+1)));
+  console.log("row: " + row);
+  console.log("col: " + col);
   return [row, col];
 }
 // find the intersection of crossing Words and partial word so that when
@@ -100,13 +102,16 @@ function autoPuzzle(){
     // an array that point to the id's of the squares in the HTML. E.g.,
     // "#box0-0" is the top left square
     hLightedArea = getWordArea(row, col, enteringRow);
+    console.log("hlight: " + hLightedArea);
     // determines how many words to search through before picking the one with
     // the highest frequency crossing words
     var optimizer = 10;
     // while the puzzle is unsolved...try to solve it
     // while puzzle
     var partialWord = getPartialWord(hLightedArea);
+    console.log(partialWord);
     var crossingAreas = getCrossAreas(hLightedArea);
+    console.log("crosses " + crossingAreas);
     // get crossing partial words
     var crossWord = "";
     var crossingWords = [];
@@ -114,6 +119,7 @@ function autoPuzzle(){
       crossWord = getPartialWord(crossingAreas[i]);
       crossingWords.push(crossWord);
     }
+    console.log("crossingWords: " + crossingWords);
     // this seems unnecessary -- shoulkd be able to find the intersection
     // when getting crosses
     var intersection = getIntersection(hLightedArea, crossingAreas[0]);
@@ -134,17 +140,26 @@ function getWordArea(r, c, direction){
   var box = "#box" + r + "-" + c;
   var wordArea = [box];
   // increment
-  var r2 = r + 1;
-  var c2 = c + 1;
-  c -= 1;
-  r -= 1;
+  if (direction){
+    var c2 = c + 1;
+    var r2 = r;
+    c -= 1;
+  }
+  else{
+    var r2 = r + 1;
+    var c2 = c;
+    r -= 1;
+  }
+  console.log("C: " + c);
   do{
     // if this box is white
     if ($("#box" + r + "-" + c).css("background-color") === "rgb(255, 255, 255)"){
         // add to beginning of the array
+        console.log("Found a lower box");
+        console.log("r = " + r + " c = " + c);
         box = "#box" + r + "-" + c;
         wordArea.unshift(box);
-        if (direction == true){
+        if (direction){
           c -= 1;
         }
         else{
@@ -152,14 +167,18 @@ function getWordArea(r, c, direction){
         }
     }
     else{
+      console.log("beg found");
+      console.log("#box" + r + "-" + c);
       begFound = true;
     }
     // or if this box is white
     if ($("#box" + r2 + "-" + c2).css("background-color") === "rgb(255, 255, 255)"){
       // add it to the end of the array
+      console.log("r2 = " + r2 + " c2 = " + c2);
+      console.log("found a higher box");
       box = "#box" + r2 + "-" + c2;
       wordArea.push(box);
-      if (direction == true){
+      if (direction){
         c2 += 1;
       }
       else{
@@ -167,10 +186,12 @@ function getWordArea(r, c, direction){
       }
     }
     else{
+      console.log("#box" + r2 + "-" + c2);
+      console.log("end found");
       endFound = true;
     }
   }
-  while (begFound == false && endFound == false);
+  while (begFound === false || endFound === false);
   return wordArea;
 }
 
