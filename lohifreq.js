@@ -48,21 +48,16 @@ function getIntersection(wordArea, crossWord){
 // takes a partial word, words that have already been tried, and any additional
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
-function autoWord(partialWord, crossingWords, intersection, callback){
-  console.log(partialWord);
-  console.log(crossingWords);
-  console.log(intersection);
+function autoWord(partialWord, crossingWords, callback){
   $.ajax({
     // see this file for description
     url: "auto-word.php",
     type: "POST",
     // blacklist is the words we've already tried
-    data: {word: partialWord, crosses: crossingWords, inter: intersection},
+    data: {word: partialWord, crosses: crossingWords},
     success: function(data){
-      var foundWord = data;
-      console.log(foundWord);
-      console.log("success");
-      callback(foundWord);
+      var result = $.parseJSON(data);
+      callback(result[0], result[1]);
     },
     error: function(xhr, parsererror, errorThrown){
        alert('request failed');
@@ -88,8 +83,10 @@ function getCrossAreas(wordArea, direction){
   for (var x in wordArea){
     var rowCol = getRowColIds(wordArea[x]);
     console.log("GC wordarea " + wordArea[x]);
-    if($(wordArea[x]).val == "" || $(wordArea[x]).val == "_"){
+    var val = $(wordArea[x]).val();
+    if(val == "" || val == "_"){
       $(wordArea[x]).val("!");
+      console.log("!");
     }
     var crossArea = getWordArea(rowCol[0], rowCol[1], direction);
     crosses.push(crossArea);
@@ -104,11 +101,10 @@ function fillInWord(answer, area, callback){
   }
 }
 
-function autoPuzzle(row, col, enteringRow){
+function autoPuzzle(hLightedArea, enteringRow){
   // NEED TO DEFINE ENTERING ROW;
     // an array that point to the id's of the squares in the HTML. E.g.,
     // "#box0-0" is the top left square
-    hLightedArea = getWordArea(row, col, enteringRow);
     console.log("AP hlight: " + hLightedArea);
     // determines how many words to search through before picking the one with
     // the highest frequency crossing words
@@ -132,11 +128,14 @@ function autoPuzzle(row, col, enteringRow){
     // when getting crosses
     var intersection = getIntersection(hLightedArea, crossingAreas[0]);
     // get downs from partial word
-    autoWord(partialWord, crossingWords, intersection, function(word){
+    autoWord(partialWord, crossingWords, function(word, index){
+      var area = crossingAreas[index];
+      console.log("WORD " + word + "index " + index);
+      console.log("HLIGHT: " + hLightedArea);
       fillInWord(word, hLightedArea, function(){
         var direction = togRowCol(enteringRow);
         console.log("auto-puzzle");
-        autoPuzzle(rowId, colId, direction);
+        autoPuzzle(area, direction);
       });
     });
     // change highlighted area to next word space
@@ -162,13 +161,10 @@ function getWordArea(r, c, direction){
     var c2 = c;
     r -= 1;
   }
-  console.log("WA C: " + c);
   do{
     // if this box is white
     if ($("#box" + r + "-" + c).css("background-color") === "rgb(255, 255, 255)"){
         // add to beginning of the array
-        console.log("WA Found a lower box");
-        console.log("WA r = " + r + " c = " + c);
         box = "#box" + r + "-" + c;
         wordArea.unshift(box);
         if (direction){
@@ -179,15 +175,11 @@ function getWordArea(r, c, direction){
         }
     }
     else{
-      console.log("WA beg found");
-      console.log("WA #box" + r + "-" + c);
       begFound = true;
     }
     // or if this box is white
     if ($("#box" + r2 + "-" + c2).css("background-color") === "rgb(255, 255, 255)"){
       // add it to the end of the array
-      console.log("WA r2 = " + r2 + " c2 = " + c2);
-      console.log("WA found a higher box");
       box = "#box" + r2 + "-" + c2;
       wordArea.push(box);
       if (direction){
@@ -198,8 +190,6 @@ function getWordArea(r, c, direction){
       }
     }
     else{
-      console.log("WA #box" + r2 + "-" + c2);
-      console.log("WA end found");
       endFound = true;
     }
   }
@@ -225,7 +215,7 @@ function displayGrid(){
   for (i = 0; i < length; i++){
     $("#grid").append("<div class='row' id='row" + i + "'></div>");
     for (p = 0; p < width; p++){
-      $("#row" + i).append("<div class='boxes-box' id='boxes-box" + i + "-" + p + "'><input class='box' id='box" + i + "-" + p + "' maxlength='2'/></div>");
+      $("#row" + i).append("<div class='boxes-box' id='boxes-box" + i + "-" + p + "'><input class='box' id='box" + i + "-" + p + "' maxlength='1'/></div>");
       // Add in default black squares
       if (template1){
         if (i <= 2 || i >= 12){
@@ -480,9 +470,10 @@ $(document).ready(function(){
     $("#auto-puzzle").on("click", function(){
       // set focus to first square
       $("#box0-0").focus();
-      rowId = 0;
-      colId = 0;
-      enteringRow = true;
-      autoPuzzle(rowId, colId, enteringRow);
+      var rowId = 0;
+      var colId = 0;
+      var enteringRow = true;
+      var area = getWordArea(rowId, colId, enteringRow);
+      autoPuzzle(area, enteringRow);
     })
 })

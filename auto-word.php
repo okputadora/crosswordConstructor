@@ -13,7 +13,6 @@ return $median;
 }
   $partialWord = $_POST["word"];
   $crosses = $_POST["crosses"];
-  $inter = $_POST["inter"];
   $limit = 10;
   $medians = [];
   // $response = queryDB($partialWord, $limit, $dbc);
@@ -47,10 +46,12 @@ return $median;
     array_push($medians, $median);
     array_push($answers, $answer);
   }
+  // foreach($medians as $value){
+  //   echo $value . "-";
+  // }
   // get the word with the best possible crosses
   $maxIndex = array_search(max($medians),$medians);
   $answer = $answers[$maxIndex];
-  // find the coordinates of the least frequent crossing
-
-  echo $answer;
+  $minIndex = array_search(min($medians),$medians);
+  echo json_encode(array($answer, $minIndex));
 ?>
