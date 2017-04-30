@@ -1,57 +1,56 @@
 <?php include_once("connect.php");
-  // $partialWord = $_POST["word"];
-  // $strlen = strlen($partialWord);
-  // $crosses = $_POST["crosses"];
-  // $freqs = [];
-  // // $index = $_POST["intersection"];
-  // $triedWords = json_decode(stripslashes($_POST["blacklist"]));
-  // $queryPart = $_POST["addQuery"];
-  // // could i add the blacklist to the query so theres fewer results to filter through
-  // $query = "SELECT * FROM nytclues WHERE (answer LIKE '" .  $partialWord . "')" . $queryPart;
-  // $response = @mysqli_query($dbc, $query);
-  // $count = mysqli_num_rows($response);
-  // $ticker = 0;
-  // $answer = 'okputadora';
-  // $allFreqs = [];
+function calculate_median($arr) {
+$count = count($arr); //total numbers in array
+$middleval = floor(($count-1)/2); // find the middle value, or the lowest middle value
+if($count % 2) { // odd number, middle is the median
+    $median = $arr[$middleval];
+} else { // even number, calculate avg of 2 medians
+    $low = $arr[$middleval];
+    $high = $arr[$middleval+1];
+    $median = (($low+$high)/2);
+}
+return $median;
+}
+  $partialWord = $_POST["word"];
+  $crosses = $_POST["crosses"];
+  $inter = $_POST["inter"];
+  $limit = 10;
+  $medians = [];
+  // $response = queryDB($partialWord, $limit, $dbc);
+  $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
+  $response = @mysqli_query($dbc, $query);
+  $answers = [];
+  // get all of the possible words
+  while ($row = mysqli_fetch_array($response)){
+    $freqs = [];
+    $answer = $row['answer'];
+    // for each crossing word
+    $index = 0;
+    foreach ($crosses as $value){
+      // insert the letter from $answer
+      $length = strlen($value);
+      for ($i = 0; $i < $length; $i++){
+        // replace
+        if (substr($value, $i, 1) == "!"){
+          $char = substr($answer, $index, 1);
+          $value = substr_replace($value, $char, $i,1);
+        }
+      }
+      $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $value . "'";
+      $response2 = @mysqli_query($dbc, $query2);
+      $count = mysqli_num_rows($response2 );
+      array_push($freqs, $count);
+      $index += 1;
+    }
+    // get median
+    $median = calculate_median($freqs);
+    array_push($medians, $median);
+    array_push($answers, $answer);
+  }
+  // get the word with the best possible crosses
+  $maxIndex = array_search(max($medians),$medians);
+  $answer = $answers[$maxIndex];
+  // find the coordinates of the least frequent crossing
 
-  echo "he";
-  // if theres no words
-  // if ($count == 0){
-  //   echo "nothing in database that matches partial word";
-  // }
-  // else{
-  //   while ($row = mysqli_fetch_array($response)){
-  //     // if (in_array($row["answer"], $triedWords)){
-  //     //   continue;
-  //     // }
-  //     // else{
-  //       // put the letters from this word in the crossing words
-  //       for ($i = 0; $i <= $strlen; $i++){
-  //         $char = substr($str, $i, 1);
-  //         // the line below is in JS need PHP equiv
-  //         $altCross = substr_replace($crosses[$i],$char,$index,1);
-  //         // check the frequency of this word
-  //         $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $altCross . "'";
-  //         $crossResponse = @mysqli_query($dbc, $query2);
-  //         $crossCount = mysqli_num_rows($crossResponse);
-  //         // if count is zero we need to change the original query
-  //         // otherwise save this info
-  //         array_push($freqs, $crossCount);
-  //       }
-  //       // save for compairson
-  //       array_push($allFreqs, $freqs);
-  //       // check the crossing words
-  //       $ticker += 1;
-  //       // if ($ticker > 9){
-  //       //   break;
-  //       // }
-  //       break;
-  //     // }
-  //   }
-  //   // if there are words but they;ve all been blacklisted
-  //   if ($answer == 'okputadora'){
-  //     echo "OKPUTADORA";
-  //   }
-  //   echo json_encode($allFreqs);
-  // }
+  echo $answer;
 ?>
