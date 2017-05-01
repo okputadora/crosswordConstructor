@@ -13,7 +13,7 @@ return $median;
 }
   $partialWord = $_POST["word"];
   $crosses = $_POST["crosses"];
-  $limit = 50;
+  $limit = 10;
   $mins = [];
   // $response = queryDB($partialWord, $limit, $dbc);
   $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
@@ -29,7 +29,7 @@ return $median;
     foreach ($crosses as $value){
       // if the word is complete skip
       if ($value == "okputadora"){
-        continue;
+        $count = 1000;
       }
       else{
         // insert the letter from $answer
@@ -45,11 +45,12 @@ return $median;
         $response2 = @mysqli_query($dbc, $query2);
         $count = mysqli_num_rows($response2);
       }
+      // IF COUNT IS ZERO THIS $ANSWER WILL NOT DO
       array_push($freqs, $count);
       $index += 1;
       // echo $answer;
     }
-    // get median
+    // get min
     $min = min($freqs);
     array_push($allFreqs, $freqs);
     array_push($mins, $min);
