@@ -13,12 +13,13 @@ return $median;
 }
   $partialWord = $_POST["word"];
   $crosses = $_POST["crosses"];
-  $limit = 10;
-  $medians = [];
+  $limit = 50;
+  $mins = [];
   // $response = queryDB($partialWord, $limit, $dbc);
   $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
   $response = @mysqli_query($dbc, $query);
   $answers = [];
+  $allFreqs = [];
   // get all of the possible words
   while ($row = mysqli_fetch_array($response)){
     $freqs = [];
@@ -26,32 +27,41 @@ return $median;
     // for each crossing word
     $index = 0;
     foreach ($crosses as $value){
-      // insert the letter from $answer
-      $length = strlen($value);
-      for ($i = 0; $i < $length; $i++){
-        // replace
-        if (substr($value, $i, 1) == "!"){
-          $char = substr($answer, $index, 1);
-          $value = substr_replace($value, $char, $i,1);
-        }
+      // if the word is complete skip
+      if ($value == "okputadora"){
+        continue;
       }
-      $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $value . "'";
-      $response2 = @mysqli_query($dbc, $query2);
-      $count = mysqli_num_rows($response2 );
+      else{
+        // insert the letter from $answer
+        $length = strlen($value);
+        for ($i = 0; $i < $length; $i++){
+          // replace
+          if (substr($value, $i, 1) == "!"){
+            $char = substr($answer, $index, 1);
+            $value = substr_replace($value, $char, $i,1);
+          }
+        }
+        $query2 = "SELECT * FROM nytclues WHERE answer LIKE '" . $value . "'";
+        $response2 = @mysqli_query($dbc, $query2);
+        $count = mysqli_num_rows($response2);
+      }
       array_push($freqs, $count);
       $index += 1;
+      // echo $answer;
     }
     // get median
-    $median = calculate_median($freqs);
-    array_push($medians, $median);
+    $min = min($freqs);
+    array_push($allFreqs, $freqs);
+    array_push($mins, $min);
     array_push($answers, $answer);
   }
   // foreach($medians as $value){
   //   echo $value . "-";
   // }
   // get the word with the best possible crosses
-  $maxIndex = array_search(max($medians),$medians);
+  $maxIndex = array_search(max($mins),$mins);
   $answer = $answers[$maxIndex];
-  $minIndex = array_search(min($medians),$medians);
+  $minMed = array_search(min($mins),$mins);
+  $minIndex = array_search(min($allFreqs[$minMed]), $allFreqs[$minMed]);
   echo json_encode(array($answer, $minIndex));
 ?>

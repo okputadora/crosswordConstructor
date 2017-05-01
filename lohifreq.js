@@ -17,7 +17,7 @@ function getPartialWord(hLightedArea, crossing){
     partialWord += letter;
   }
   if (alreadyComplete){
-    return false;
+    return "okputadora";
   }
   else {return partialWord;}
 }
@@ -29,8 +29,6 @@ function getRowColIds(box){
   var y = box.indexOf("x");
   var row = parseInt(box.substring((y+1), n));
   var col = parseInt(box.substring((n+1)));
-  console.log("row: " + row);
-  console.log("col: " + col);
   return [row, col];
 }
 // find the intersection of crossing Words and partial word so that when
@@ -49,6 +47,7 @@ function getIntersection(wordArea, crossWord){
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
 function autoWord(partialWord, crossingWords, callback){
+  console.log("Partial Word: " + partialWord);
   $.ajax({
     // see this file for description
     url: "auto-word.php",
@@ -56,6 +55,7 @@ function autoWord(partialWord, crossingWords, callback){
     // blacklist is the words we've already tried
     data: {word: partialWord, crosses: crossingWords},
     success: function(data){
+      console.log(data);
       var result = $.parseJSON(data);
       callback(result[0], result[1]);
     },
@@ -82,11 +82,9 @@ function getCrossAreas(wordArea, direction){
   direction = togRowCol(direction);
   for (var x in wordArea){
     var rowCol = getRowColIds(wordArea[x]);
-    console.log("GC wordarea " + wordArea[x]);
     var val = $(wordArea[x]).val();
     if(val == "" || val == "_"){
       $(wordArea[x]).val("!");
-      console.log("!");
     }
     var crossArea = getWordArea(rowCol[0], rowCol[1], direction);
     crosses.push(crossArea);
@@ -97,8 +95,8 @@ function getCrossAreas(wordArea, direction){
 function fillInWord(answer, area, callback){
   for (var i in area){
     $(area[i]).val(answer.charAt(i));
-    callback();
   }
+  callback();
 }
 
 function autoPuzzle(hLightedArea, enteringRow){
@@ -111,8 +109,15 @@ function autoPuzzle(hLightedArea, enteringRow){
     var optimizer = 10;
     // while the puzzle is unsolved...try to solve it
     // while puzzle
-    var partialWord = getPartialWord(hLightedArea);
-    console.log(partialWord);
+    var partialWord = getPartialWord(hLightedArea, false);
+    if (partialWord == "okputadora"){
+      var rowCol = getRowColIds(hLightedArea[0]);
+      r = rowCol[0] + 1;
+      c = rowCol[1] + 1;
+      hLightedArea = getWordArea(r, c, direction);
+      autoPuzzle(hLightedArea, direction);
+    }
+    console.log("partial word: " + partialWord);
     var crossingAreas = getCrossAreas(hLightedArea, enteringRow);
     console.log("AP crosses " + crossingAreas);
     // get crossing partial words
@@ -120,7 +125,7 @@ function autoPuzzle(hLightedArea, enteringRow){
     var crossingWords = [];
     var crossing = true;
     for (var i in crossingAreas){
-      crossWord = getPartialWord(crossingAreas[i], crossing);
+      var crossWord = getPartialWord(crossingAreas[i], crossing);
       crossingWords.push(crossWord);
     }
     console.log("AP crossingWords: " + crossingWords);
@@ -134,7 +139,7 @@ function autoPuzzle(hLightedArea, enteringRow){
       console.log("HLIGHT: " + hLightedArea);
       fillInWord(word, hLightedArea, function(){
         var direction = togRowCol(enteringRow);
-        console.log("auto-puzzle");
+        console.log("area: " + area + "direction " + direction);
         autoPuzzle(area, direction);
       });
     });
