@@ -2,6 +2,10 @@
 // that could fit in the desired space and select the one that leads to highest
 // frequency of possibilities for the words going
 
+// global variable for autoPuzzle
+var enteredPartWords = [];
+var enteredWords = [];
+var enteredAreas = [];
 // getPartialWord takes the current boxes and returns a string with "_"
 // signifying empty boxes. returns false if the word is already filled in
 function getPartialWord(hLightedArea, crossing){
@@ -46,14 +50,17 @@ function getIntersection(wordArea, crossWord){
 // takes a partial word, words that have already been tried, and any additional
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
-function autoWord(partialWord, crossingWords, callback){
+function autoWord(partialWord, crossingWords, blacklist, callback){
+  if (blacklist === undefined){
+    blacklist = "no";
+  }
   console.log("Partial Word: " + partialWord);
   $.ajax({
     // see this file for description
     url: "auto-word.php",
     type: "POST",
     // blacklist is the words we've already tried
-    data: {word: partialWord, crosses: crossingWords},
+    data: {word: partialWord, crosses: crossingWords, queryAdd: blacklist},
     success: function(data){
       console.log(data);
       var result = $.parseJSON(data);
@@ -92,28 +99,62 @@ function getCrossAreas(wordArea, direction){
   return crosses;
 }
 
+// puts the returned answer into the board
 function fillInWord(answer, area, callback){
   for (var i in area){
-    $(area[i]).val(answer.charAt(i));
+    if (answer.charAt(i) == "_" || answer.charAt(i) == "!"){
+      $(area[i]).val("");
+    }
+    else{$(area[i]).val(answer.charAt(i));}
+
   }
+  console.log("ANSWER: " + answer);
   callback();
 }
 
-function autoPuzzle(hLightedArea, enteringRow){
-  // NEED TO DEFINE ENTERING ROW;
-    // an array that point to the id's of the squares in the HTML. E.g.,
-    // "#box0-0" is the top left square
+function saveWord(partialWord, word, area){
+  enteredPartWords.push(partialWord);
+  enteredWords.push(word);
+  enteredAreas.push(area);
+}
+
+function getPrevWordInfo(callback){
+  var length = enteredPartWords.length;
+  var partialWord = enteredPartWords[length-1];
+  var bList = enteredWords[length-1];
+  var area = enteredAreas[length-1];
+  // remove from list
+  enteredAreas.pop();
+  enteredWords.pop();
+  enteredPartWords.pop();
+  console.log(enteredPartWords);
+  console.log("GPA: " + area);
+  console.log("GPA: " + partialWord);
+  var wordInfo = [area, partialWord, bList];
+  callback(wordInfo);
+}
+
+function revise(){};
+
+// while the puzzle is unsolved...try to solve it
+function autoPuzzle(hLightedArea, enteringRow, partWord, blacklist){
     console.log("AP hlight: " + hLightedArea);
-    // determines how many words to search through before picking the one with
-    // the highest frequency crossing words
-    var optimizer = 10;
-    // while the puzzle is unsolved...try to solve it
-    // while puzzle
-    var partialWord = getPartialWord(hLightedArea, false);
+    // if this is a revision
+    if (partWord){
+      console.log("...revising")
+      var partialWord = partWord;
+      console.log("revising: " + partialWord);
+    }
+    // if this the first search for this area
+    else{
+      // second argument tells function if we are getting cross partial words
+      var partialWord = getPartialWord(hLightedArea, false);
+    }
     if (partialWord == "okputadora"){
       var rowCol = getRowColIds(hLightedArea[0]);
       r = rowCol[0] + 1;
       c = rowCol[1] + 1;
+      console.log("SHOULDNZT BE IN HERE");
       hLightedArea = getWordArea(r, c, direction);
       autoPuzzle(hLightedArea, direction);
     }
@@ -129,19 +170,31 @@ function autoPuzzle(hLightedArea, enteringRow){
       crossingWords.push(crossWord);
     }
     console.log("AP crossingWords: " + crossingWords);
-    // this seems unnecessary -- shoulkd be able to find the intersection
-    // when getting crosses
-    var intersection = getIntersection(hLightedArea, crossingAreas[0]);
     // get downs from partial word
-    autoWord(partialWord, crossingWords, function(word, index){
-      var area = crossingAreas[index];
-      console.log("WORD " + word + "index " + index);
-      console.log("HLIGHT: " + hLightedArea);
-      fillInWord(word, hLightedArea, function(){
-        var direction = togRowCol(enteringRow);
-        console.log("area: " + area + "direction " + direction);
-        autoPuzzle(area, direction);
-      });
+    autoWord(partialWord, crossingWords, blacklist, function(word, index){
+      var direction = togRowCol(enteringRow);
+      if (word == "need to revise"){
+        // clear previous word
+        fillInWord(partialWord, hLightedArea, function(){})
+        // get the previous word info
+        console.log("NEED TO REVISE");
+        console.log(index);
+        getPrevWordInfo(function(prevWordInfo){
+          // clear word area
+          fillInWord(prevWordInfo[1], prevWordInfo[0], function(){
+            autoPuzzle(prevWordInfo[0], direction, prevWordInfo[1], prevWordInfo[2]);
+          })
+        });
+      }
+      else{
+        var area = crossingAreas[index];
+        fillInWord(word, hLightedArea, function(){
+          console.log("area: " + area + "direction " + direction);
+          saveWord(partialWord, word, hLightedArea);
+          // get rid of any words in blacklist
+          autoPuzzle(area, direction);
+        });
+      }
     });
     // change highlighted area to next word space
 
@@ -346,6 +399,22 @@ function toggleCol(){
 
 // when all is loaded
 $(document).ready(function(){
+  $("#auto-clue").on("click", function(){
+    $.ajax({
+      // see this file for description
+      url: "auto-clue.php",
+      type: "POST",
+      // blacklist is the words we've already tried,
+      success: function(data){
+        console.log(data);
+      },
+      error: function(xhr, parsererror, errorThrown){
+         alert('request failed');
+         console.log(textStatus);
+      }
+  })
+})
+
   $("#opt1").on("click", function(){
     $("#opt1").css("display", "none");
     $("#opt2").css("display", "none");
@@ -379,7 +448,7 @@ $(document).ready(function(){
       colId = this.id.substring(n+1);
        // highlight();
        // highlightbox();
-    });
+    })
     $('#grid').on("keypress", ".box", function(){
       if (event.which === 49){
         if($(this).val() === "1"){

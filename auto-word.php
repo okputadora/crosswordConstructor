@@ -15,10 +15,19 @@ return $median;
 }
   $partialWord = $_POST["word"];
   $crosses = $_POST["crosses"];
-  $limit = 10;
+  $limit = 60;
+  $blacklist = $_POST["queryAdd"];
   $mins = [];
   // $response = queryDB($partialWord, $limit, $dbc);
-  $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
+  if ($blacklist == "no"){
+    $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
+  }
+  else{
+    $limit = 100;
+    $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord .
+    "' AND (answer NOT LIKE '" . $blacklist . "') LIMIT " . $limit;
+
+  }
   $response = @mysqli_query($dbc, $query);
   $answers = [];
   $allFreqs = [];
@@ -76,6 +85,6 @@ return $median;
   }
   // we didn't find a suitable word
   else{
-    echo json_encode(array("need to revise"));
+    echo json_encode(array("need to revise", $query));
   }
 ?>
