@@ -87,8 +87,8 @@ function lastCheck(){
     // Fill in the lowest frequency word
     rowId = lowFreqRow;
     colId = lowFreqCol;
-    // save this info
-    previousFoundWord = [foundWord, testWord, rowId, colId, !enteringRow, last];
+    // save this info // should probably save it in JSON
+    previousFoundWord = [foundWord, testWord, rowId, colId, !enteringRow, last, testWordArea];
     enteredWords.push(previousFoundWord);
     lowestFreq = -1;
     // remove this freuqency from the previous
@@ -171,6 +171,7 @@ function getCross(){
     }
   })
 }
+
   // if this word was already complete
   else {
     // if this is the last check;
@@ -194,6 +195,7 @@ function autoWord(solving){
   if (solving == "revise"){
     partialWord = testWord;
     var query = revQuery;
+    console.log("Revising: partialWord: " + partialWord + "revquery " + revQuery);
   }
   else{
     partialWord = getPartialWord();
@@ -203,26 +205,53 @@ function autoWord(solving){
   if (partialWord){
     console.log("partial found word: " + partialWord);
     var jsonTriedWords = JSON.stringify(triedWords);
+    // querey the database for a word that fits the partialWord
     $.ajax({
       url: "auto-word.php",
       type: "POST",
       // blacklist is the words we've already tried
-      data: 'word='+ partialWord + '&blacklist=' + jsonTriedWords '&addQuery=' + query,
+      data: 'word='+ partialWord + '&blacklist=' + jsonTriedWords + '&addQuery=' + query,
       success: function(data){
         foundWord = data;
         // if the database had no words satisfying the criteria
         if (foundWord === 'OKPUTADORA'){
           // revise the prior word
           // 1. locate the problematic letter
-
-          // 2. enter it into a partial query
-          // this current definition only works for last letter
-          // need it to be dynamic
-          revQuery = " AND (answer not REGEXP '" + xLet + "$')"
-          // 3. retrieve the location of the previous word
+          //// its going to be the box shared by this word and the previous word
+          // filter through this words boxes
           var len = enteredWords.length;
-          triedWords.push(enteredWords[len-1][0]);
+          console.log(enteredWords);
+          var prevArea = enteredWords[len-1][6];
           testWord = enteredWords[len-1][1];
+          for (var d in hLightedArea){
+            // and check them against boxes from the previous word;
+            for (var l in prevArea){
+              if (hLightedArea[d] == prevArea[l]){
+                var badBox = prevArea[l]
+                var badLet = $(prevArea[l]).val()
+                break;
+              }
+            }
+          }
+          // 2. create string for revised query
+          var badString = "";
+          console.log("PREVAREA: " + prevArea);
+          console.log("BADBOIX: " + badBox);
+          console.log("TESTWIORD: " + testWord + testWord.charAt(0));
+          for (var s in prevArea){
+            if (prevArea[s] == badBox){
+              badString += badLet;
+            }
+            else{
+              badString += testWord.charAt(s)
+            }
+          }
+          console.log("badString : " + badString);
+          // 2. enter it into a partial query
+
+          revQuery = " AND (answer NOT LIKE '" + badString + "')";
+          // 3. retrieve the location of the previous word
+          triedWords.push(enteredWords[len-1][0]);
           rowId = enteredWords[len-1][2];
           colId = enteredWords[len-1][3];
           enteringRow = enteredWords[len-1][4];
@@ -382,7 +411,6 @@ function highlight(solving){
 }
 
 function shadeBlack(row, column){
-
 }
 
 function addNumbers(row, col){
@@ -664,7 +692,7 @@ $(document).ready(function(){
       // set focus to first square
       $("#box0-0").focus();
       rowId = 0;
-      colId = 0;
+      colId = 6;
       highlight("puzzle");
     })
 
