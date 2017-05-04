@@ -14,19 +14,20 @@ function calculate_median($arr) {
 return $median;
 }
   $partialWord = $_POST["word"];
-  $crosses = $_POST["crosses"];
-  $limit = 60;
-  $blacklist = $_POST["queryAdd"];
+  $crosses = json_decode($_POST["crosses"]);
+  $limit = 20;
+  $blacklist = json_decode($_POST["queryAdd"]);
   $mins = [];
+  $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
   // $response = queryDB($partialWord, $limit, $dbc);
-  if ($blacklist == "no"){
-    $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
-  }
-  else{
-    $limit = 100;
-    $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord .
-    "' AND (answer NOT LIKE '" . $blacklist . "') LIMIT " . $limit;
-
+  if (count($blacklist) > 0){
+    $limit = 20;
+    // blacklist to string
+    $queryExt = "";
+    foreach($blacklist as $value){
+      $queryExt = $queryExt . "AND answer NOT LIKE '" . $value . "' ";
+    }
+    $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord ."' " . $queryExt . "LIMIT " . $limit;
   }
   $response = @mysqli_query($dbc, $query);
   $answers = [];

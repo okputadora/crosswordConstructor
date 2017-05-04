@@ -51,16 +51,14 @@ function getIntersection(wordArea, crossWord){
 // query information. makes an ajax call to auto-word.php and returns a
 // complete word that matches the partial word
 function autoWord(partialWord, crossingWords, blacklist, callback){
-  if (blacklist === undefined){
-    blacklist = "no";
-  }
+  console.log(blacklist);
   console.log("Partial Word: " + partialWord);
   $.ajax({
     // see this file for description
     url: "auto-word.php",
     type: "POST",
     // blacklist is the words we've already tried
-    data: {word: partialWord, crosses: crossingWords, queryAdd: blacklist},
+    data: {word: partialWord, crosses: JSON.stringify(crossingWords), queryAdd: JSON.stringify(blacklist)},
     success: function(data){
       console.log(data);
       var result = $.parseJSON(data);
@@ -134,10 +132,8 @@ function getPrevWordInfo(callback){
   callback(wordInfo);
 }
 
-function revise(){};
-
 // while the puzzle is unsolved...try to solve it
-function autoPuzzle(hLightedArea, enteringRow, partWord, blacklist){
+function autoPuzzle(hLightedArea, enteringRow, blacklist, partWord){
     console.log("AP hlight: " + hLightedArea);
     // if this is a revision
     if (partWord){
@@ -180,9 +176,10 @@ function autoPuzzle(hLightedArea, enteringRow, partWord, blacklist){
         console.log("NEED TO REVISE");
         console.log(index);
         getPrevWordInfo(function(prevWordInfo){
+          blacklist.push(prevWordInfo[2]);
           // clear word area
           fillInWord(prevWordInfo[1], prevWordInfo[0], function(){
-            autoPuzzle(prevWordInfo[0], direction, prevWordInfo[1], prevWordInfo[2]);
+            autoPuzzle(prevWordInfo[0], direction, blacklist, prevWordInfo[1]);
           })
         });
       }
@@ -191,16 +188,13 @@ function autoPuzzle(hLightedArea, enteringRow, partWord, blacklist){
         fillInWord(word, hLightedArea, function(){
           console.log("area: " + area + "direction " + direction);
           saveWord(partialWord, word, hLightedArea);
-          // get rid of any words in blacklist
-          autoPuzzle(area, direction);
+
+          autoPuzzle(area, direction, blacklist);
         });
       }
     });
-    // change highlighted area to next word space
-
     // check if we're done
 }
-
 // takes 2 ints (row and column) and a boolean (enteringRow = true/false) and
 // returns an array of box id's for that current word
 function getWordArea(r, c, direction){
@@ -548,6 +542,7 @@ $(document).ready(function(){
       var colId = 0;
       var enteringRow = true;
       var area = getWordArea(rowId, colId, enteringRow);
-      autoPuzzle(area, enteringRow);
+      var blacklist = [];
+      autoPuzzle(area, enteringRow, blacklist);
     })
 })
