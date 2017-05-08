@@ -13,39 +13,30 @@
   href="style.css">
 <head>
   <script src="../jQuery.js"></script>
-  <script src="crossing.js"></script>
+  <!-- <script src="crossing.js"></script> -->
+  <script src="lohifreq.js"></script>
   <!-- <script src="intelligence.js"></script> -->
-
-<body id="main-content" class>
   <?php include_once("toolbar.php") ?>
-  <div id="opt1"class="option main-box">
-    <h2 class="optTitle"> set grid</h2>
-    <img class="optImg" src="opt1.jpg"/>
-    <p class="optDesc"> set your length and width first.</p>
-  </div>
-  <div id="opt2"class="option main-box">
-    <h2 class="optTitle"> build as you go</h2>
-    <img class="optImg"/>
-    <p class="optDesc"> Just start connecting words, figure out the grid
-    size later.</p>
+<body id="main-content" class>
+  <div id="#welcome" class="option intro-box">
+    <p class="welcomeP" id="p1">Crossword constructor allows you to create your own crossword
+    puzzles from scratch.</p>
+    <p class="welcomeP" id="p2">You can fill in as much of the grid as you want</p>
+    <p class="welcomeP" id="p3">And have the constructor do the rest</p>
   </div>
   <div id="gridsize" class="option main-box">
-    <h2>grid size</h2>
-    <input id="len"class="input"type="text" placeholder="length" />
-    <input id="wid"class="input"type="text" placeholder="width" />
-    <div id="submit">
-      create grid
+    <h2>Select a grid</h2>
+    <div id="gridOpts">
+      <div class="gridOpt" id="customGrid">
+        <div class="gTitle">custom grid</div>
+        <div class="gPic"></div>
+        <input id="len"class="input"type="text" placeholder="length" />
+        <input id="wid"class="input"type="text" placeholder="width" />
+        <div id="submit">
+          create grid
+        </div>
+      </div>
     </div>
   </div>
-  <div id="premade" class="main-box">
-    <h2>Choose a layout</h2>
-    <div id="layout1">Layout 1</div>
-    <div id="blanklayout">Blank</div>
-  </div>
-  <div id="crossword" class="main-box">
-    <div id="grid">
 
-    </div>
-  </div>
-  
 </body>
