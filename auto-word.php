@@ -15,13 +15,13 @@ return $median;
 }
   $partialWord = $_POST["word"];
   $crosses = json_decode($_POST["crosses"]);
-  $limit = 20;
+  $limit = 60;
   $blacklist = json_decode($_POST["queryAdd"]);
   $mins = [];
   $query = "SELECT * FROM nytclues WHERE answer LIKE '" .  $partialWord . "' LIMIT " . $limit;
   // $response = queryDB($partialWord, $limit, $dbc);
   if (count($blacklist) > 0){
-    $limit = 20;
+    $limit = 60;
     // blacklist to string
     $queryExt = "";
     foreach($blacklist as $value){

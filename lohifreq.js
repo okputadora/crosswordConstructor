@@ -132,6 +132,8 @@ function getPrevWordInfo(callback){
   callback(wordInfo);
 }
 
+function revise(){};
+
 // while the puzzle is unsolved...try to solve it
 function autoPuzzle(hLightedArea, enteringRow, blacklist, partWord){
     console.log("AP hlight: " + hLightedArea);
@@ -188,13 +190,18 @@ function autoPuzzle(hLightedArea, enteringRow, blacklist, partWord){
         fillInWord(word, hLightedArea, function(){
           console.log("area: " + area + "direction " + direction);
           saveWord(partialWord, word, hLightedArea);
-
           autoPuzzle(area, direction, blacklist);
         });
       }
     });
     // check if we're done
 }
+
+// scan the board for and find the lowest frequency position to start
+function scanForStart(){
+
+}
+
 // takes 2 ints (row and column) and a boolean (enteringRow = true/false) and
 // returns an array of box id's for that current word
 function getWordArea(r, c, direction){
@@ -255,6 +262,33 @@ function highlight(wordArea){
 function addNumbers(row, col, sqNum){
   $("#boxes-box" + row + "-" + col).append("<div class='number'>" + sqNum + "</div>");
   sqNum += 1;
+}
+
+function readGrid(board, width){
+  var length = board.length;
+  console.log(length);
+  console.log(width);
+  var row = 0;
+  $("#grid").append("<div class='row' id='row" + row + "'></div>");
+  for (var i = 0; i < length; i++){
+    // check if its time to make a new row
+    if (i%width === 0){
+      row += 1;
+      $("#grid").append("<div class='row' id='row" + row + "'></div>");
+      var col = 0;
+    }
+    //add a box
+    $("#row" + row).append("<div class='boxes-box' id='boxes-box" + row + "-" + col + "'><input class='box' id='box" + row + "-" + col + "' maxlength='1'/></div>");
+    // put in black square
+    if (board.charAt(i) === "&"){
+      $("#box" + row + "-" + col).css("background-color", "black");
+    }
+    // put in white square
+    else if (board.charAt(i) === "#"){
+      $("#box" + row + "-" + col).css("background-color", "white");
+    }
+    col += 1;
+  }
 }
 
 function displayGrid(){
@@ -390,28 +424,122 @@ function toggleCol(){
    // highlight();
    // highlightbox();
 }
+function fillInGrid(board, width, id){
+  $("#grid" + id).append("<div class='grid' id='grid'" + id + "'");
+  var length = board.length;
+  var row = 0;
+  var col = 0;
+  $("#grid" + id).append("<div class='row' id='row" + row + "'></div>");
+  for (var i = 0; i < length; i++){
+    // check if its time to make a new row
+    if (i%width === 0){
+      row += 1;
+      $("#grid" + id).append("<div class='row' id='row" + row + "-" + id + "'></div>");
+      col = 0;
+    }
+    //add a box
+    $("#row" + row + "-" + id).append("<div class='boxes-box' id='boxes-box" + row + "-" + col + "-" + id + "'><input class='box' id='box" + row + "-" + col + "-" + id + "' maxlength='1'/></div>");
+    // put in black square
+    if (board.charAt(i) === "&"){
+      $("#box" + row + "-" + col + "-" + id).css("background-color", "black");
+    }
+    // put in white square
+    else if (board.charAt(i) === "#"){
+      $("#box" + row + "-" + col + "-" + id).css("background-color", "white");
+    }
+    col += 1;
+  }
+}
+
+function displayGridOpts(){
+  $.ajax({
+    url: "get-boards.php",
+    type: "POST",
+    success: function(data){
+      var boards = JSON.parse(data);
+      console.log(boards[0]);
+      for (var i in boards){
+        var stringer = boards[i][0];
+        var width = boards[i][1];
+        var gridId = boards[i][2];
+        var gridName = parseInt(gridId) + 1;
+        $("#gridOpts").append("<div class='gridOpt' id='grid" + gridId + "'></div>");
+        $("#grid" + gridId).append("<div class='gTitle'>Grid " + gridName + "</div>");
+        fillInGrid(stringer, width, gridId);
+      }
+    }
+});
+}
 
 // when all is loaded
 $(document).ready(function(){
-  $("#auto-clue").on("click", function(){
-    $.ajax({
-      // see this file for description
-      url: "auto-clue.php",
-      type: "POST",
-      // blacklist is the words we've already tried,
-      success: function(data){
-        console.log(data);
-      },
-      error: function(xhr, parsererror, errorThrown){
-         alert('request failed');
-         console.log(textStatus);
-      }
+  $("#loginB").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
+    setTimeout(function(){
+      $("#loginPage").css("display", "none");
+      $("#loginBox").css("display", "flex");
+    }, 500)
+  });
+
+  $("#signUp").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
+    setTimeout(function(){
+      $("#loginPage").css("display", "none");
+      $("#signUpBox").css("display", "flex");
+    }, 500)
+  });
+
+  $("#create").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
+    setTimeout(function(){
+      $("#loginPage").css("display", "none");
+      $("#welcome").css("display", "flex");
+      $("#p1").animate({marginRight: ("0px")}, 400);
+      setTimeout(function(){
+        $("#p1").animate({marginRight: ("6000px")}, 1000);
+        $("#p2").animate({marginRight: ("0px")}, 1000);
+        setTimeout(function(){
+          $("#p2").animate({marginRight: ("6000px")}, 1000);
+          $("#p3").animate({marginRight: ("0px")}, 1000);
+          setTimeout(function(){
+            $("#p3").animate({marginRight: ("6000px")}, 1000);
+            $(".intro-box").css("display", "none");
+            $("#gridsize").css("display", "flex");
+            displayGridOpts();
+          }, 3000)
+        }, 3000);
+      }, 3000);
+    }, 500);
+
   })
-})
+
+
+
+
+  $(".gridOpt").on("click", function(){
+  //   $.ajax({
+  //     // see this file for description
+  //     url: "auto-clue.php",
+  //     type: "POST",
+  //     // blacklist is the words we've already tried,
+  //     success: function(data){
+  //       console.log(data);
+  //     },
+  //     error: function(xhr, parsererror, errorThrown){
+  //        alert('request failed');
+  //        console.log(textStatus);
+  //     }
+  // })
+  })
+
+
+  $("#enter").on("click", function(){
+    $("#welcome").css("display", "none");
+    $("#opt1").css("display", "flex");
+  })
 
   $("#opt1").on("click", function(){
     $("#opt1").css("display", "none");
-    $("#opt2").css("display", "none");
     $("#gridsize").css("display", "flex");
     $("#len").focus();
   })

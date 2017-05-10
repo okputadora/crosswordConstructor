@@ -1,25 +1,48 @@
 #toolbar{
   width: 100%;
-  background-color: whitesmoke;
-  height: 100px;
+  background-color: black;
+  height: 50px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   position: fixed;
   border-bottom: 1px solid black;
+  box-shadow: 2px 2px 4px 2px black;
+  position: fixed;
+  z-index: 2;
+}
+
+#user{
+  display: flex;
 }
 
 #title{
-  letter-spacing: .09em;
-  color: black;
+  letter-spacing: .4em;
+  color: white;
   margin-right: auto;
   margin-left: 120px;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
 
+#divider{
+  width: 3px;
+  height: 35px;
+  background-color: white;
+  display: block;
+  margin-left: 35px;
+}
+
+.toolOpt{
+  color: white;
+  font-size: 20px;
+  margin-right: 40px;
+  cursor: pointer;
 }
 
 #tools{
-  display: none;
+  display: flex;
   transition: .5s;
   margin-right: 80px;
   justify-content: space-around;
