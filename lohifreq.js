@@ -473,21 +473,46 @@ function displayGridOpts(){
 
 // when all is loaded
 $(document).ready(function(){
-  $("#p1").animate({marginRight: ("0px")}, 1000);
-  setTimeout(function(){
-    $("#p1").animate({marginRight: ("6000px")}, 1000);
-    $("#p2").animate({marginRight: ("0px")}, 1000);
+  $("#loginB").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
     setTimeout(function(){
-      $("#p2").animate({marginRight: ("6000px")}, 1000);
-      $("#p3").animate({marginRight: ("0px")}, 1000);
+      $("#loginPage").css("display", "none");
+      $("#loginBox").css("display", "flex");
+    }, 500)
+  });
+
+  $("#signUp").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
+    setTimeout(function(){
+      $("#loginPage").css("display", "none");
+      $("#signUpBox").css("display", "flex");
+    }, 500)
+  });
+
+  $("#create").on("click", function(){
+    $(".lButton").animate({marginRight: ("6000px")}, 500);
+    setTimeout(function(){
+      $("#loginPage").css("display", "none");
+      $("#welcome").css("display", "flex");
+      $("#p1").animate({marginRight: ("0px")}, 400);
       setTimeout(function(){
-        $("#p3").animate({marginRight: ("6000px")}, 1000);
-        $(".intro-box").css("display", "none");
-        $("#gridsize").css("display", "flex");
-        displayGridOpts();
-      }, 3000)
-    }, 3000);
-  }, 3000);
+        $("#p1").animate({marginRight: ("6000px")}, 1000);
+        $("#p2").animate({marginRight: ("0px")}, 1000);
+        setTimeout(function(){
+          $("#p2").animate({marginRight: ("6000px")}, 1000);
+          $("#p3").animate({marginRight: ("0px")}, 1000);
+          setTimeout(function(){
+            $("#p3").animate({marginRight: ("6000px")}, 1000);
+            $(".intro-box").css("display", "none");
+            $("#gridsize").css("display", "flex");
+            displayGridOpts();
+          }, 3000)
+        }, 3000);
+      }, 3000);
+    }, 500);
+
+  })
+
 
 
 

@@ -3,9 +3,8 @@
   padding: 0;
   margin: 0;
   font-family: 'Muli';
-  /*border: 1px solid red;*/
+  border: 1px solid red;
 }
-
 
 #main-content{
   display: flex;
@@ -15,13 +14,95 @@
 }
 
 .intro-box{
-  margin-top: 270px;
+  margin-top: 130px;
   min-width: 30%;
-  display: flex;
+  display: none;
   flex-flow: column;
   align-items: center;
+}
+
+#loginPage{
+  display: flex;
+}
+
+.lButton{
+  padding: 5px 40px 5px 40px ;
+  width: 300px;
+  text-align: center;
+  letter-spacing: .1em;
+  margin-bottom: 20px;
+  border-radius: 3px;
+  color: white;
+  height: 40px;
+  font-size: 20px;
+  vertical-align: middle;
   cursor: pointer;
 }
+
+#fb-root{display: none;}
+#loginPage{
+  /*display: flex;*/
+}
+
+.lboxTitle{
+  font-size: 30px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid black;
+  letter-spacing: .15em;
+  margin-bottom: 20px;
+}
+
+.manualLogin{
+  margin-top: 10px;
+  width: 300px;
+  height: 40px;
+  border-radius: 3px;
+  border: 1px solid #333;
+  padding: 5px;
+  font-size: 20px;
+  text-align: center;
+}
+
+.enterB{
+  width: 200px;
+  height: 30px;
+  margin-top: 10px;
+  text-align: center;
+  border-radius: 3px;
+  padding: 4px;
+  transition: .3s;
+}
+
+#login{
+  border: 1px solid #7FDC57;
+  color: #7FDC57;
+  background-color: white;
+}
+
+#login:hover{
+  background-color: #7FDC57;
+  color: white;
+  cursor: pointer;
+}
+
+#createNew{
+  border: 1px solid #F05f79;
+  background-color: white;
+  color: #F05F79;
+}
+
+#createNew:hover{
+  cursor: pointer;
+  color: white;
+  background-color: #F05F79;
+}
+#welcome{
+  display: none;
+}
+
+#loginB{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
+#signUp{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
+#create{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
 
 .welcomeP{
   width: 60%;
@@ -47,6 +128,7 @@
   margin-top: 100px;
   /*display changed to flex in js*/
   display: none;
+  width: 66%;
   flex-direction: column;
 }
 
@@ -64,12 +146,13 @@
 }
 
 .gridOpt{
-  height: 300px;
+  height: 200px;
   width: 200px;
   margin-bottom: 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  z-index: 1;
 }
 
 .number{
@@ -157,6 +240,7 @@
 .gridOpt{
   display: flex;
   justify-content: center;
+  cursor: pointer;
 }
 
 .box{
