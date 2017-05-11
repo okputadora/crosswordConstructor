@@ -1,6 +1,6 @@
 <?php include_once("connect.php");
-$id = $_POST["userID"];
-$name = $_POST["userName"];
+$id = $_GET["userID"];
+$name = $_GET["username"];
 $date = "DATE";
 
 $command = "INSERT INTO users ('id', 'name', 'datejoined')
@@ -8,3 +8,4 @@ $command = "INSERT INTO users ('id', 'name', 'datejoined')
 $response = mysqli_query($dbc, $command);
 
 // create table to store their puzzles and any other data we may want
+?>

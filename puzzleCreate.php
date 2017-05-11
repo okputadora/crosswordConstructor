@@ -32,16 +32,19 @@ if (isset($_GET['idx'])){
   <body id="main-content" class>
 
   <script src= "../fb.js"></script>
-
-  <!-- facebook login -->
   <?php include_once("toolbar.php") ?>
-  <div id="workspace">
-    <div id='id'>></div>
-    <div id="puzzleGrid">
+  <!-- facebook login -->
 
+  <div id="workspace">
+    <div id='id'><?php echo $id ?></div>
+    <div id="workbench">
+      
+    </div>
+    <div id="puzzleGrid">
+      <div id="locDis"></div>
+      <div id="grid<?php echo $id ?>"></div>
     </div>
     <div id="puzzleCrossClues">
-
     </div>
     <div id="puzzleDownClues">
 

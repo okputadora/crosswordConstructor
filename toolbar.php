@@ -1,6 +1,6 @@
-<head>
+
 <link rel="stylesheet" type = "text/css" href="tbstyle.css">
-</head>
+
 <script src="https://use.fontawesome.com/041a8a6fad.js"></script>
 <div id="toolbar">
   <div id="title">

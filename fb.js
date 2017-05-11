@@ -1,6 +1,6 @@
 // global variables
-var username = "";
-var userID = "010";
+var username = "default";
+var userID = 1023;
 
 
 // This is called with the results from from FB.getLoginStatus().
@@ -45,7 +45,7 @@ var userID = "010";
 
  };
 
- // Load the SDK asynchronously
+ // Load the FB SDK asynchronously
  (function(d, s, id) {
    var js, fjs = d.getElementsByTagName(s)[0];
    if (d.getElementById(id)) return;
@@ -61,15 +61,42 @@ var userID = "010";
      $("#user").html("<div id='username'>" + response.name + "</div");
      FB.api("/"+ response.id +"/picture", function (response) {
        if (response && !response.error) {
+         // change profile to user image
          $("#user").append("<img id='userpic' width = '25px' heigth = '25px' src = '" + response.data.url  + "'/>");
          console.log(response.data.url);
+         // display profile page
+         // EDIT LATER - NEEDS TO MATCH ACTUAL FILE STRUCTURE OF LIVE SITE
+         window.location.href = "localhost/crossword/profile.php/?id=" + userID + "&n=" + username;
        }
      });
    });
   }
 $(document).ready(function(){
   $("#user").on("click", function(){
-    console.log("INHERE");
-    window.location = "profile.php/?id="+ userID;
+    console.log("INHERE " + userID + username);
+    if(userID){
+    // EDIT LATER - NEEDS TO MATCH ACTUAL FILE STRUCTURE OF LIVE SITE
+      window.location.href = "profile.php/?id=" + userID + "&n=" + username;
+    }
+    else{
+      // promt them to login
+    }
+
   });
-});
+  $("#fbl").on("click", function(){
+    FB.getLoginStatus(function(response) {
+      statusChangeCallback(response);
+    });
+  });
+
+  $("#settings").on("click", function(){
+    // LOGOUT of FB
+    console.log("gettin a click");
+    FB.logout(function(response) {
+      console.log(response);
+      // switch profile picture back to anon
+      $("#user").html('<i class="fa fa-user" aria-hidden="true"></i></div>');
+   });
+  })
+
+ });

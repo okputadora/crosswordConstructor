@@ -425,6 +425,7 @@ function toggleCol(){
    // highlightbox();
 }
 function fillInGrid(board, width, id){
+  console.log("filling in the gird");
   $("#grid" + id).append("<div class='grid' id='grid'" + id + "'");
   var length = board.length;
   var row = 0;
@@ -452,6 +453,7 @@ function fillInGrid(board, width, id){
 }
 
 function displayGridOpts(){
+  console.log("getting boards")
   $.ajax({
     url: "get-boards.php",
     type: "POST",
@@ -491,46 +493,42 @@ $(document).ready(function(){
 
   $("#create").on("click", function(){
     $(".lButton").animate({marginRight: ("6000px")}, 500);
-    setTimeout(function(){
-      $("#loginPage").css("display", "none");
-      $("#welcome").css("display", "flex");
-      $("#p1").animate({marginRight: ("0px")}, 400);
+    if ( $(window).width() > 700){
       setTimeout(function(){
-        $("#p1").animate({marginRight: ("6000px")}, 1000);
-        $("#p2").animate({marginRight: ("0px")}, 1000);
-        setTimeout(function(){
-          $("#p2").animate({marginRight: ("6000px")}, 1000);
-          $("#p3").animate({marginRight: ("0px")}, 1000);
+        $("#loginPage").css("display", "none");
+          $("#welcome").css("display", "flex");
+          $("#p1").animate({marginRight: ("0px")}, 400);
           setTimeout(function(){
-            $("#p3").animate({marginRight: ("6000px")}, 1000);
-            $(".intro-box").css("display", "none");
-            $("#gridsize").css("display", "flex");
-            displayGridOpts();
-          }, 3000)
-        }, 3000);
-      }, 3000);
-    }, 500);
+            $("#p1").animate({marginRight: ("6000px")}, 1000);
+            $("#p2").animate({marginRight: ("0px")}, 1000);
+            setTimeout(function(){
+              $("#p2").animate({marginRight: ("6000px")}, 1000);
+              $("#p3").animate({marginRight: ("0px")}, 1000);
+              setTimeout(function(){
+                $("#p3").animate({marginRight: ("6000px")}, 1000);
+                $(".intro-box").css("display", "none");
+                $("#gridsize").css("display", "flex");
+                displayGridOpts();
+              }, 3000)
+            }, 3000);
+          }, 3000);
+        }, 500);
+      }
+      else{
+        $("#loginPage").css("display", "none");
+        $("#gridsize").css("display", "flex");
+        displayGridOpts();
+      }
 
   })
 
-
-
-
-  $(".gridOpt").on("click", function(){
-  //   $.ajax({
-  //     // see this file for description
-  //     url: "auto-clue.php",
-  //     type: "POST",
-  //     // blacklist is the words we've already tried,
-  //     success: function(data){
-  //       console.log(data);
-  //     },
-  //     error: function(xhr, parsererror, errorThrown){
-  //        alert('request failed');
-  //        console.log(textStatus);
-  //     }
-  // })
+  $("#gridsize").on("click", ".gridOpt", function(){
+    var idx = this.id;
+    idx = idx.substring(4);
+    console.log(idx);
+    window.location.href = "puzzleCreate.php/?idx=" + idx;
   })
+
 
 
   $("#enter").on("click", function(){

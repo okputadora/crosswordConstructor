@@ -132,6 +132,15 @@
   flex-direction: column;
 }
 
+@media screen and (max-width: 415px){
+  .main-box, #gridsize{
+    margin-top: none;
+  }
+  .main-box >h2{
+    font-size: 15px;
+    padding: 5px;
+  }
+}
 .main-box > h2{
   padding: 30px;
   letter-spacing: .1em;

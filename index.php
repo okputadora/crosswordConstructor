@@ -16,21 +16,24 @@
   <!-- <script src="crossing.js"></script> -->
   <script src="lohifreq.js"></script>
   <!-- <script src="intelligence.js"></script> -->
+<?php include_once("toolbar.php") ?>
 <body id="main-content" class>
 
 <!-- Facebook login -->
 <script src= "fb.js"></script>
 
 <!-- facebook login -->
-<?php include_once("toolbar.php") ?>
+
   <div id="loginPage" class="intro-box">
-    <div id="loginB" class="lButton">Sign Up</div>
-    <div id="signUp" class="lButton">Login</div>
+    <div id="loginB" class="lButton">Login</div>
+    <div id="signUp" class="lButton">Sign Up</div>
     <div id="create" class="lButton">Create A Puzzle</div>
   </div>
   <div id="loginBox" class="lBox intro-box">
     <h2 class="lboxTitle">Login to Crossword Constructor</h2>
-    <div class="fb-login-button" data-width="300" data-max-rows="1" data-size="large" data-button-type="continue_with" data-show-faces="false" data-auto-logout-link="false" data-use-continue-as="true"></div>
+
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
     <div style="margin-top: 10px;">or login manually</div>
     <input class="manualLogin" id="emailL" type="email" placeholder="email"></form>
     <input class="manualLogin" id="pwL" type="password" placeholder="password"></form>
