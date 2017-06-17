@@ -16,11 +16,11 @@
   <!-- <script src="crossing.js"></script> -->
   <script src="lohifreq.js"></script>
   <!-- <script src="intelligence.js"></script> -->
-<?php include_once("toolbar.php") ?>
-<body id="main-content" class>
 
+<body id="main-content" class>
+<?php include_once("toolbar.php") ?>
 <!-- Facebook login -->
-<script src= "fb.js"></script>
+<!-- <script src= "fb.js"></script> -->
 
 <!-- facebook login -->
 
@@ -32,7 +32,7 @@
   <div id="loginBox" class="lBox intro-box">
     <h2 class="lboxTitle">Login to Crossword Constructor</h2>
 
-<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+<!-- <fb:login-button scope="public_profile,email" onlogin="checkLoginState();"> -->
 </fb:login-button>
     <div style="margin-top: 10px;">or login manually</div>
     <input class="manualLogin" id="emailL" type="email" placeholder="email"></form>
@@ -50,7 +50,7 @@
   <div id="welcome" class="option intro-box">
     <p class="welcomeP" id="p1">Crossword constructor allows you to create your own crossword
     puzzles from scratch.</p>
-    <p class="welcomeP" id="p2">You can fill in as much of the grid as you want</p>
+    <p class="welcomeP" id="p2">You can fill in as much or as little of the grid as you want</p>
     <p class="welcomeP" id="p3">And have the constructor do the rest</p>
   </div>
   <div id="gridsize" class="option main-box">

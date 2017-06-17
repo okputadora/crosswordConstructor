@@ -1,5 +1,5 @@
-// tracks which direction the next box will be pulled from when highlighting,
 // filling in, or checking a word
+// tracks which direction the next box will be pulled from when highlighting,
 var enteringRow = true;
 // array of highlighted boxes
 var hLightedArea = [];
@@ -171,7 +171,6 @@ function getCross(){
     }
   })
 }
-
   // if this word was already complete
   else {
     // if this is the last check;
@@ -198,7 +197,7 @@ function autoWord(solving){
     console.log("Revising: partialWord: " + partialWord + "revquery " + revQuery);
   }
   else{
-    partialWord = getPartialWord();
+    // partialWord = getPartialWord();
     var query = '';
   }
   // if there's some blanks
@@ -220,7 +219,6 @@ function autoWord(solving){
           //// its going to be the box shared by this word and the previous word
           // filter through this words boxes
           var len = enteredWords.length;
-          console.log(enteredWords);
           var prevArea = enteredWords[len-1][6];
           testWord = enteredWords[len-1][1];
           for (var d in hLightedArea){
@@ -237,19 +235,19 @@ function autoWord(solving){
           var badString = "";
           console.log("PREVAREA: " + prevArea);
           console.log("BADBOIX: " + badBox);
-          console.log("TESTWIORD: " + testWord + testWord.charAt(0));
+          console.log("")
           for (var s in prevArea){
             if (prevArea[s] == badBox){
               badString += badLet;
             }
             else{
-              badString += testWord.charAt(s)
+              badString + testWord.charAt(s)
             }
           }
           console.log("badString : " + badString);
           // 2. enter it into a partial query
 
-          revQuery = " AND (answer NOT LIKE '" + badString + "')";
+          revQuery = " AND (answer NOT LIKE '" +  + "')";
           // 3. retrieve the location of the previous word
           triedWords.push(enteredWords[len-1][0]);
           rowId = enteredWords[len-1][2];
@@ -411,6 +409,7 @@ function highlight(solving){
 }
 
 function shadeBlack(row, column){
+
 }
 
 function addNumbers(row, col){
@@ -692,7 +691,7 @@ $(document).ready(function(){
       // set focus to first square
       $("#box0-0").focus();
       rowId = 0;
-      colId = 6;
+      colId = 8;
       highlight("puzzle");
     })
 

@@ -3,12 +3,20 @@
   padding: 0;
   margin: 0;
   font-family: 'Muli';
-  border: 1px solid red;
+  /*border: 1px solid red;*/
+}
+
+body{
+  width: 1200px;
+  margin: auto;
+  box-shadow: -1px 1px 3px 2px whitesmoke;
+  min-height: 100vh;
 }
 
 #main-content{
   display: flex;
-  justify-content: space-around;
+  align-items: center;
+  flex-direction: column;
   background-color: white;
   overflow-x: hidden;
 }
@@ -100,9 +108,9 @@
   display: none;
 }
 
-#loginB{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
-#signUp{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
-#create{background-color: #6290C8; box-shadow: 2px 2px 4px 2px #777;}
+#loginB{background-color: rgb(124, 181, 245); box-shadow: 2px 2px 4px 2px #777;}
+#signUp{background-color: rgb(124, 181, 245); box-shadow: 2px 2px 4px 2px #777;}
+#create{background-color: rgb(124, 181, 245); box-shadow: 2px 2px 4px 2px #777;}
 
 .welcomeP{
   width: 60%;
@@ -231,16 +239,16 @@
   display: none;
   box-shadow: 0px 2px 19px 1px #232323;
 }
-.boxes-box{
+.bocksesBox{
   position: relative;
   height: 10px;
   width: 10px;
 }
 .number{
   position: absolute;
-  top: 0;
+  top: 1px;
   left: 2px;
-  font-size: 15px;
+  font-size: 4px;
 }
 .row{
   display:flex;
@@ -257,6 +265,7 @@
   font-size: 5px;
   height: 10px;
   width: 10px;
+  position: absolute;
   text-align: center;
   text-transform: capitalize;
   border: 1px solid black;

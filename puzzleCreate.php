@@ -2,7 +2,7 @@
 if (isset($_GET['idx'])){
   $id = $_GET['idx'];
 }
-
+$name = "okputadora";
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -25,31 +25,48 @@ if (isset($_GET['idx'])){
   <!-- Facebook login -->
   <script src = "../jQuery.js"></script>
   <script src = "../lohifreq.js"></script>
-  <script src = "../puzzleCreate.js"</script>
+  <script src = "../puzzleCreate.js"></script>
 
 <head>
 
   <body id="main-content" class>
 
-  <script src= "../fb.js"></script>
+  <!-- <script src= "../fb.js"></script> -->
   <?php include_once("toolbar.php") ?>
+  <?php include_once("tools.php") ?>
   <!-- facebook login -->
 
   <div id="workspace">
-    <div id='id'><?php echo $id ?></div>
-    <div id="workbench">
-      
-    </div>
-    <div id="puzzleGrid">
-      <div id="locDis"></div>
-      <div id="grid<?php echo $id ?>"></div>
-    </div>
-    <div id="puzzleCrossClues">
-    </div>
-    <div id="puzzleDownClues">
+    <!-- idx for the sole purpose of telling js the id it can build the grid -->
+    <div id='idx'><?php echo $id ?></div>
+    <div id='puzName'><input type="text" id='puzNameIn'placeholder="Title"/></div>
+    <div id='puzAuth'>By <?php echo $name ?></div>
+    <div id="puzArea">
+      <div class="clues"id="puzzleCrossClues">
+        <div class="clueTitle">Across</div>
+        <div class="clueBox" id="crossClueBox">
 
-    </div>
+        </div>
+      </div>
+      <div id="puzzleGrid" tabindex="1">
+        <div class="grid"id="grid<?php echo $id ?>"></div>
+        <div id="suggestionBox">
+          <div id="suggestionBanner">
+            <div id="suggestionT">Suggestions...</div>
+            <div id="suggestionI"><i class="fa fa-info-circle" aria-hidden="true"></i></div>
+          </div>
+          <div id="suggestionOpts">
 
+          </div>
+        </div>
+      </div>
+      <div class="clues"id="puzzleDownClues">
+        <div class="clueTitle">Down</div>
+        <div class="clueBox" id="downClueBox">
+
+        </div>
+      </div>
+    </div>
   </div>
 
 </body>
